@@ -1,0 +1,329 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc,decorations.pathreplacing,shapes,fit}
+\usepackage{colortbl}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\usepackage{array, adjustbox,url}
+\usepackage{pifont,marvosym} % wasysym
+\usepackage{rotating,subfig}
+\usepackage{xspace}
+
+\title{BTI 3021: Networking Project - Sprint 1}
+
+\author{Christian Grothoff}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+For this sprint you will implement, document and test an Ethernet
+switch in userland under GNU/Linux.
+
+While the driver and skeleton you are given is written in C, you may
+use {\em any} language of your choice for the implementation (as long
+as you extend the {\tt Makefile} with adequate build rules).  However,
+if you choose a different language, be prepared to write additional
+boilerplate yourselves.
+
+How an Ethernet switch works is expected to be understood from the
+networking class. If not, you can find plenty of documentation and
+specifications on the Internet.
+
+
+\subsection{Deliverables}
+
+There will be three main deliverables for the sprint:
+\begin{description}
+\item[Documentation] You must document the main
+  data structure (switching table), the switching algorithm
+  and a {\bf comprehensive test plan}.
+\item[Implementation] You must implement the switching
+  algorithm, extending the {\tt switch.c} template provided
+  (or write the entire logic from scratch in another language).
+\item[Testing] You must implement and submit your own {\bf test cases}
+  by {\em pretending} to be the network driver (see below) and sending
+  various Ethernet frames to your program and verifying that it
+  outputs the correct frames. Additionally, you should perform and
+  {\bf document} {\em interoperability} tests against existing
+  implementations (i.e. other notebooks from your team to ensure that
+  your switch integrates correctly with other implementations).
+\end{description}
+
+All deliverables must be submitted to Git (master branch)
+by {\bf November 4th 2020, 18:00 CET}.
+
+\subsection{Team}
+
+You are expected to work in a team of four students. The suggested
+division of work is:
+\begin{description}
+\item[1 Student] Scrum master, also responsible for the documentation
+\item[1 Student] Implementation
+\item[2 Students] Testing
+\end{description}
+
+
+\subsection{Grading}
+
+You get points for each of the key deliverables:
+\begin{center}
+\begin{tabular}{l|r}
+Technical documentation (A\&D, test plan) &  3 \\ \hline
+Correct implementation                    &  7 \\ \hline
+Comprehensive test cases                  &  4 \\ \hline
+Quality of English in documentation       &  2 \\ \hline \hline
+Total                                     & 16
+\end{tabular}
+\end{center}
+
+We will specifically also look for the following properties of a switch:
+\begin{itemize}
+\item Support for multicast and broadcast
+\item Changing external connections (re-learning when devices move around the network)
+\item Managing an ``attacker'' process that sends from billions of MAC
+  addresses.  Ensure your switch's learning table uses finite memory.
+\end{itemize}
+
+Parial points are awarded.
+
+You can earn 16, 15 and 19 points in the three networking sprints, for
+a total of 50 points.  You need {\bf 37 points} to pass the networking
+component of BTI 3021.
+
+
+\section{Hardware}
+
+You will be given a 4-port Ethernet USB adapter that you can use to
+add four physical ports to any PC.  If you use the laboratory PCs, be
+aware that some of the USB ports provide insufficient power. Which
+ones work is inconsistent even across identical PCs and often even the
+adjacent USB port works even though it looks identical!
+
+You are not expected to write a driver to interact directly with the
+Ethernet USB adapter.  Instead, you will use the provided
+{\tt network-driver} which can already provide you with raw access
+to any Ethernet interface (incl. WLAN).
+
+
+\subsection{Alternative setup with virtual machines}
+
+Download a basic qemu VM, for example from
+\url{https://people.debian.org/~aurel32/qemu/amd64/}.
+
+Then launch your router with four network interfaces and
+the respective up scripts and disjoint MACs:
+\begin{verbatim}
+# qemu-system-x86_64 -hda wheezy.qcov2 \
+   -device e1000,netdev=net0,mac=10:10:A0:D0:C0:B1 \
+   -netdev socket,id=net0,listen=:10001 \
+   -device e1000,netdev=net1,mac=10:10:A0:D0:C0:B2 \
+   -netdev socket,id=net0,listen=:10002 \
+   -device e1000,netdev=net2,mac=10:10:A0:D0:C0:B3 \
+   -netdev socket,id=net0,listen=:10003 \
+   -device e1000,netdev=net3,mac=10:10:A0:D0:C0:B4 \
+   -netdev socket,id=net0,listen=:10004
+\end{verbatim}
+Then, launch additional VMs to connect ``other'' systems
+to your router:
+\begin{verbatim}
+# cp wheezy.qcov2 wheezy0.qcov
+# qemu-system-x86_64 -hda wheezy0.qcov2 \
+   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B1 \
+   -netdev socket,id=net0,connect:10001
+# cp wheezy.qcov2 wheezy1.qcov
+# qemu-system-x86_64 -hda wheezy1.qcov2 \
+   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B2 \
+   -netdev socket,id=net0,connect:10002
+# cp wheezy.qcov2 wheezy2.qcov
+# qemu-system-x86_64 -hda wheezy2.qcov2 \
+   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B3 \
+   -netdev socket,id=net0,connect:10003
+# cp wheezy.qcov2 wheezy3.qcov
+# qemu-system-x86_64 -hda wheezy3.qcov2 \
+   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B4 \
+   -netdev socket,id=net0,connect:10004
+\end{verbatim}
+You may want to link up your VMs to your host to copy files:
+\begin{verbatim}
+# qemu-system-x86_64 ...
+  -net nic -net user,hostfwd=tcp::5555-:22
+\end{verbatim}
+Now your localhost port 5555 is forwarded to port 22 of the
+virtual machine.
+
+
+
+\section{The {\tt network-driver}}
+
+To access the hardware, your final program should be {\em executed}
+by the {\tt network-driver}.  For this, you call
+\begin{verbatim}
+$ network-driver IFC1 ... IFCn - switch ARGS
+\end{verbatim}
+where ``IFC1 ... IFCn'' is the list of interface names that you
+want {\tt network-driver} to support (i.e. ``lan0'', ``lan1'')
+and ``PROG'' is the name of your binary and ``ARGS'' are the
+command-line arguments to ``PROG''.  Note the ``-'' (single minus)
+between the last interface name and ``PROG''.  Also, ``PROG'' must
+be given with the path or be in the PATH.
+
+Once you start {\tt switch} like this, you can read Ethernet frames
+and end-user commands from ``stdin'' and write Ethernet
+frames (and end-user output) to ``stdout''.
+
+Note that you must follow the {\tt network-driver}'s particular
+format for inter-process communication when reading and writing.
+You will {\bf not} be communicating directly with the console!
+
+
+\subsection{Build the driver}
+
+To comple the code, run:
+\begin{verbatim}
+# This requires gcc
+$ make
+# Creating network interfaces requires 'root' rights
+$ sudo chmod +s network-driver
+# Try it out:
+$ ./network-driver eth0 - ./parser
+\end{verbatim}
+Press CTRL-C to stop the {\tt network-driver} and {\tt parser}.
+
+
+\subsection{Understanding the driver}
+
+The output of the driver is always in binary and generally in network
+byte order.  You can use a tool like {\tt hexer} to make the output
+slightly more readable.
+
+The driver will always output a series of messages starting with
+a {\tt struct GLAB\_MessageHeader} that includes a type and a size.
+
+When the driver starts, it first writes a control message (of type 0)
+with payload that includes 6 bytes for each of the local interface's
+MAC addresses to your {\tt stdin}.  Henceforce, messages received
+of type 0 will be single lines of command-line input (including the
+'\\n'-terminator, but excluding the 0-terminator of C) as typed in
+by the user.
+
+Furthermore, the driver will output a {\tt struct GLAB\_MessageHeader}
+for each frame received.  The {\tt struct GLAB\_MessageHeader} will be
+followed by the actual network frame, starting with the Ethernet frame
+excluding preamble, delimiter and FCS.  The {\tt struct
+  GLAB\_MessageHeader} includes the total length of the subsequent
+frame (encoded in network byte order, the size includes the {\tt
+  struct GLAB\_MessageHeader}).  The fixed message type identifies the
+number of the network interface, counting from one (also in network
+byte order).
+
+In addition to writing received frames to your {\tt stdin}, the driver
+also tries to read from your {\tt stdout}.  Applications must send the
+same message format to {\tt stdout} that the driver sends them on {\tt
+  stdin}.  The driver does {\bf not} check that the source MAC is set
+correctly!
+
+To write to the console's {\tt stdout}, use a message type of 0.
+You may directly write to {\tt stderr} for error messages.
+
+
+\section{Provided code}
+
+You are given a few C snippets as starting points. However, these
+mostly serve to {\em illustrate} how to process the output from the
+driver. You are completely free to implement your application in {\em
+  any} programming language.  Note that each file includes about 20
+LOC of a licensing statement, so the functions provided should not
+provide a significant advantage for implementations in C.
+
+\begin{description}
+\item[sample-parser.c]{This file includes a simple starting point for
+  a wireshark-like frame inspection code.
+  It mostly shows how the frames are received and
+  a bit how to use the other C files. (82 LOC)}
+\item[glab.h]{A struct defining a MAC Address and a few common C includes. (90 LOC)}
+\item[print.c]{This file shows how to wrap messages to print them
+  via the driver. (112 LOC)}
+\item[loop.c]{This could be the main loop of your application. Includes
+  some basic logic to look at each frame, decide whether it is the MACs,
+  control or an Ethernet frame and then calls the respective function. (93 LOC)}
+\item[crc.c]{An implementation of checksum algorithms. (194 LOC)}
+\end{description}
+
+If you are using another programming language, you are free to re-use
+an existing CRC implementation in that language.
+
+
+The main file for the exercise is {\tt switch.c}. In this file, you should
+implement a program {\tt switch} which forwards frames received on any
+interface to any other interface, but passively learns MAC addresses
+and optimizes subsequent traffic.
+
+
+\section{Warm-up exercises}
+
+These exercises may help you get familiar with the provided environment.
+They are {\bf not graded}.
+
+\subsection{Frame parsing}
+
+Extend the simple frame {\tt parser} to:
+\begin{enumerate}
+\item Output your system's MAC address(es) in the canonical human-readable format.
+\item Output the source MAC, destination MAC, payload type and payload length
+  of each frame received. Confirm your results with {\tt wireshark}.
+\end{enumerate}
+
+\subsection{Implement a Hub}
+
+Implement {\tt hub} which forwards frames received on any interface to
+all other interfaces ({\tt eth0} through {\tt eth3}), without changing
+them at all.  The {\tt hub} binary should take the list of interfaces
+to use on the command line.
+
+
+\section{Bonus exercise}
+
+This exercise may help you better understand the material from the
+networking course. It is not expected to be achievable within the
+period of the sprint and best done as a follow-up. It is {\bf not
+  graded}.
+
+Implement {\em vswitch} which forwards frames received on any
+interface to any other interface, passively learns MAC addresses,
+and respects VLAN tags. As before, the command-line specifies the
+list of network interfaces you should switch on, but with
+additional options to specify the VLANS.  Example:
+\begin{verbatim}
+$ network-driver eth0 eth1 eth2 eth3 - \
+  vswitch eth0[T:1,2] eth1[U:1] eth2[U:2] eth3[U:2]
+\end{verbatim}
+This is supposed to run VLANs 1 and 2 tagged on {\tt eth0},
+and VLANs 1, 2 or 2 untagged on {\tt eth1}, {\tt eth2},
+or {\tt eth3} respectively.  Network interfaces specified
+without ``[]'' should operate untagged on VLAN 0.  It is
+not allowed to have interfaces accept both tagged and
+untagged frames.
+
+Test your implementation against the Netgear switch of the lab.
+Bridge a tagged VLAN ({\tt VID}$=3$) from the Netgear switch ({\tt
+  eth1}) with two untagged notebooks ({\tt eth2}, {\tt eth3}) using
+the BananaPi.
+
+Properties to consider for a virtual switch:
+\begin{itemize}
+\item Correct forwarding? Do frames flow bidirectionally between eth2 and eth3?
+\item Correct switching? Is learning correctly implemented?
+\item Are VLAN tags added/stripped?
+\item Are correct limitations imposed on VLANs?
+      Is say $VID=4$ not forwarded to eth2/eth3?
+\end{itemize}
+
+
+\end{document}

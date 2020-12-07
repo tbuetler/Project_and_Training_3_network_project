@@ -102,12 +102,9 @@ The goal is to implement a program {\tt arp} that:
 \begin{enumerate}
 \item Watches for ARP queries on the Ethernet link
 \item Responds with ARP responses for your own IP address
-\item Reads IPv4 addresses from {\tt stdin} (in human-readable format),
-  issues ARP queries for those IPv4 addresses and outputs the
-  resulting MAC addresses.  The interactive command syntax should be
-  ``arp {\em IP-ADDR} {\em IFNAME}'' (i.e. each line is to be prefixed with
-  the letters ``arp '', followed by the IPv4 address and the name of
-  the network interface).  If the user just enteres ``arp'' without
+\item Provides an ARP cache so that it does not have to repeatedly
+  make ARP requests to the network for MAC addresses it already knows.
+\item If the user just enteres ``arp'' without
   an IP address, you should output the ARP table in the format
   ``{\em IP} -$>$ {\em MAC} ({\em IFNAME})'' with one entry per line,
   i.e.
@@ -115,8 +112,23 @@ The goal is to implement a program {\tt arp} that:
 10.54.25.15 -> 28:c6:3f:1a:0a:bf (eth1)
 \end{verbatim}
   (note the leading ``0'' digit in {\tt 0a}).
-\item Provides an ARP cache so that it does not have to repeatedly
-  make ARP requests to the network for MAC addresses it already knows.
+\item Reads IPv4 addresses from {\tt stdin} (in human-readable format).
+  The interactive command syntax should be
+  ``arp {\em IP-ADDR} {\em IFNAME}'' (i.e. each line is to be prefixed with
+  the letters ``arp '', followed by the IPv4 address and the name of
+  the network interface).
+  \begin{enumerate}
+  \item
+  If the {\tt IP-ADDR} is in the ARP cache, the program must immediately
+  output the associated {\em MAC}.
+  \item
+  If the {\tt IP-ADDR} is NOT in the ARP cache, the program should {\em only}
+  issue the ARP query for those IPv4 addresses.
+  \end{enumerate}
+\item If an ARP response is received (at any time), the ARP cache must be
+  updated accordingly (but the MAC address does not need to be output at
+  that time, even if there was an explicit command-line request for this
+  address before).
 \end{enumerate}
 Your programm should be called with the name of the interface, the IP
 address\footnote{You may support multiple IPs per network interface,

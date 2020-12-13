@@ -43,19 +43,18 @@ The basic setup is the same as in the first two sprints.
 There will be three main deliverables for the sprint:
 \begin{description}
 \item[Documentation] You must document the main
-  data structure (ARP table) and a {\bf comprehensive test plan}.
-\item[Implementation] You must implement the ARP protocol. Your
-  implementation must answer to ARP requests, and also itself
-  have the ability to issue ARP requests and to cache ARP replies.
-  For this, you are to extend the {\tt arp.c} template provided
+  data structure (routing table) and a {\bf comprehensive test plan}.
+\item[Implementation] You must implement the IP protocol. Your
+  implementation must answer to IP packets, and route them.
+  For this, you are to extend the {\tt router.c} template provided
   (or write the entire logic from scratch in another language).
 \item[Testing] You must implement and submit your own {\bf test cases}
   by {\em pretending} to be the network driver (see below) and sending
-  ARP requests or command-line inputs to your program and verifying that it
+  IP packets or command-line inputs to your program and verifying that it
   outputs the correct frames. Additionally, you should perform and
   {\bf document} {\em interoperability} tests against existing
   implementations (i.e. other notebooks from your team to ensure that
-  your ARP protocol implementation integrates correctly with other
+  your IP router implementation integrates correctly with other
   implementations).
 \end{description}
 

@@ -115,7 +115,8 @@ Implement {\tt router} which routes IPv4 packets:
   obtain the destination's MAC instead (once per dropped IP packet).
 \item Make sure to decrement the TTL field and recompute the CRC.
   % add link to logic implementing CRC?
-\item Generate ICMP messages for ``no route to host'' and ``TTL exceeded''.
+\item Generate ICMP messages for ``no route to network'' (ICMP
+    Type 3, Code 0) and ``TTL exceeded'' (ICMP Type 3, Code 4).
 \item Support the syntax {\tt IFC[RO]=MTU} where {\tt MTU} is the
   MTU for IFC.  Example: {\tt eth0=1500}.  Implement and test IPv4 fragmentation
   (including {\em do not fragment}-flag support).

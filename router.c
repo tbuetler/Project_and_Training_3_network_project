@@ -156,11 +156,11 @@ struct ArpHeaderEthernetIPv4
 struct IPv4Header
 {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-  unsigned int header_length:4;
-  unsigned int version:4;
+  unsigned int header_length : 4;
+  unsigned int version : 4;
 #elif __BYTE_ORDER == __BIG_ENDIAN
-  unsigned int version:4;
-  unsigned int header_length:4;
+  unsigned int version : 4;
+  unsigned int header_length : 4;
 #else
   #error byteorder undefined
 #endif
@@ -208,9 +208,8 @@ struct IPv4Header
 };
 
 
-
-#define	ICMPTYPE_DESTINATION_UNREACHABLE 3
-#define	ICMPTYPE_TIME_EXCEEDED 11
+#define ICMPTYPE_DESTINATION_UNREACHABLE 3
+#define ICMPTYPE_TIME_EXCEEDED 11
 
 #define ICMPCODE_NETWORK_UNREACHABLE 0
 #define ICMPCODE_HOST_UNREACHABLE 1
@@ -248,7 +247,6 @@ struct IcmpHeader
 
 };
 _Pragma("pack(pop)")
-
 
 
 /**
@@ -308,8 +306,8 @@ static struct Interface *gifc;
  */
 static void
 forward_to (struct Interface *dst,
-	    const void *frame,
-	    size_t frame_size)
+            const void *frame,
+            size_t frame_size)
 {
   char iob[frame_size + sizeof (struct GLAB_MessageHeader)];
   struct GLAB_MessageHeader hdr;
@@ -319,14 +317,14 @@ forward_to (struct Interface *dst,
   hdr.size = htons (sizeof (iob));
   hdr.type = htons (dst->ifc_num);
   memcpy (iob,
-	  &hdr,
-	  sizeof (hdr));
+          &hdr,
+          sizeof (hdr));
   memcpy (&iob[sizeof (hdr)],
-	  frame,
-	  frame_size);
+          frame,
+          frame_size);
   write_all (STDOUT_FILENO,
-	     iob,
-	     sizeof (iob));
+             iob,
+             sizeof (iob));
 }
 
 
@@ -409,8 +407,8 @@ handle_arp (struct Interface *ifc,
  */
 static void
 parse_frame (struct Interface *ifc,
-	     const void *frame,
-	     size_t frame_size)
+             const void *frame,
+             size_t frame_size)
 {
   struct EthernetHeader eh;
   const char *cframe = frame;
@@ -418,46 +416,50 @@ parse_frame (struct Interface *ifc,
   if (frame_size < sizeof (eh))
   {
     fprintf (stderr,
-	     "Malformed frame\n");
+             "Malformed frame\n");
     return;
   }
   memcpy (&eh,
-	  frame,
-	  sizeof (eh));
+          frame,
+          sizeof (eh));
   switch (ntohs (eh.tag))
   {
   case ETH_P_IPV4:
     {
       struct IPv4Header ip;
 
-      if (frame_size < sizeof (struct EthernetHeader) + sizeof (struct IPv4Header))
-        {
-          fprintf (stderr,
-                   "Malformed frame\n");
-          return;
-        }
+      if (frame_size < sizeof (struct EthernetHeader) + sizeof (struct
+                                                                IPv4Header))
+      {
+        fprintf (stderr,
+                 "Malformed frame\n");
+        return;
+      }
       memcpy (&ip,
               &cframe[sizeof (struct EthernetHeader)],
               sizeof (struct IPv4Header));
       /* TODO: possibly do work here (ARP learning) */
       route (ifc,
              &ip,
-             &cframe[sizeof (struct EthernetHeader) + sizeof (struct IPv4Header)],
-             frame_size - sizeof (struct EthernetHeader) - sizeof (struct IPv4Header));
+             &cframe[sizeof (struct EthernetHeader) + sizeof (struct
+                                                              IPv4Header)],
+             frame_size - sizeof (struct EthernetHeader) - sizeof (struct
+                                                                   IPv4Header));
       break;
     }
   case ETH_P_ARP:
     {
       struct ArpHeaderEthernetIPv4 ah;
 
-      if (frame_size < sizeof (struct EthernetHeader) + sizeof (struct ArpHeaderEthernetIPv4))
-        {
+      if (frame_size < sizeof (struct EthernetHeader) + sizeof (struct
+                                                                ArpHeaderEthernetIPv4))
+      {
 #if DEBUG
-          fprintf (stderr,
-                   "Unsupported ARP frame\n");
+        fprintf (stderr,
+                 "Unsupported ARP frame\n");
 #endif
-          return;
-        }
+        return;
+      }
       memcpy (&ah,
               &cframe[sizeof (struct EthernetHeader)],
               sizeof (struct ArpHeaderEthernetIPv4));
@@ -486,14 +488,14 @@ parse_frame (struct Interface *ifc,
  */
 static void
 handle_frame (uint16_t interface,
-	      const void *frame,
-	      size_t frame_size)
+              const void *frame,
+              size_t frame_size)
 {
   if (interface > num_ifc)
     abort ();
   parse_frame (&gifc[interface - 1],
-	       frame,
-	       frame_size);
+               frame,
+               frame_size);
 }
 
 
@@ -506,7 +508,7 @@ handle_frame (uint16_t interface,
 static struct Interface *
 find_interface (const char *name)
 {
-  for (unsigned int i=0;i<num_ifc;i++)
+  for (unsigned int i = 0; i<num_ifc; i++)
     if (0 == strcasecmp (name,
                          gifc[i].name))
       return &gifc[i];
@@ -527,35 +529,35 @@ process_cmd_arp ()
   struct Interface *ifc;
 
   if (NULL == tok)
-    {
-      // print_arp_cache ();
-      return;
-    }
+  {
+    // print_arp_cache ();
+    return;
+  }
   if (1 !=
       inet_pton (AF_INET,
                  tok,
                  &v4))
-    {
-      fprintf (stderr,
-               "`%s' is not a valid IPv4 address\n",
-               tok);
-      return;
-    }
+  {
+    fprintf (stderr,
+             "`%s' is not a valid IPv4 address\n",
+             tok);
+    return;
+  }
   tok = strtok (NULL, " ");
   if (NULL == tok)
-    {
-      fprintf (stderr,
-               "No network interface provided\n");
-      return;
-    }
+  {
+    fprintf (stderr,
+             "No network interface provided\n");
+    return;
+  }
   ifc = find_interface (tok);
   if (NULL == ifc)
-    {
-      fprintf (stderr,
-               "Interface `%s' unknown\n",
-               tok);
-      return;
-    }
+  {
+    fprintf (stderr,
+             "Interface `%s' unknown\n",
+             tok);
+    return;
+  }
   /* TODO: do MAC lookup */
 }
 
@@ -580,43 +582,43 @@ parse_network (struct in_addr *network,
 
   tok = strchr (net, '/');
   if (NULL == tok)
-    {
-      fprintf (stderr,
-               "Error in network specification: lacks '/'\n");
-      return 1;
-    }
+  {
+    fprintf (stderr,
+             "Error in network specification: lacks '/'\n");
+    return 1;
+  }
   ip = strndup (net,
                 tok - net);
   if (1 !=
       inet_pton (AF_INET,
                  ip,
                  network))
-    {
-      fprintf (stderr,
-               "IP address `%s' malformed\n",
-               ip);
-      free (ip);
-      return 1;
-    }
+  {
+    fprintf (stderr,
+             "IP address `%s' malformed\n",
+             ip);
+    free (ip);
+    return 1;
+  }
   free (ip);
   tok++;
   if (1 !=
       sscanf (tok,
               "%u",
               &mask))
-    {
-      fprintf (stderr,
-               "Netmask `%s' malformed\n",
-               tok);
-      return 1;
-    }
+  {
+    fprintf (stderr,
+             "Netmask `%s' malformed\n",
+             tok);
+    return 1;
+  }
   if (mask > 32)
-    {
-      fprintf (stderr,
-               "Netmask invalid (too large)\n");
-      return 1;
-    }
-  netmask->s_addr = htonl (~ (uint32_t) ((1LLU << (32 - mask)) - 1LLU));
+  {
+    fprintf (stderr,
+             "Netmask invalid (too large)\n");
+    return 1;
+  }
+  netmask->s_addr = htonl (~(uint32_t) ((1LLU << (32 - mask)) - 1LLU));
   return 0;
 }
 
@@ -642,52 +644,52 @@ parse_route (struct in_addr *target_network,
        (0 != parse_network (target_network,
                             target_netmask,
                             tok)) )
-    {
-      fprintf (stderr,
-               "Expected network specification, not `%s'\n",
-               tok);
-      return 1;
-    }
+  {
+    fprintf (stderr,
+             "Expected network specification, not `%s'\n",
+             tok);
+    return 1;
+  }
   tok = strtok (NULL, " ");
   if ( (NULL == tok) ||
        (0 != strcasecmp ("via",
                          tok)))
-    {
-      fprintf (stderr,
-               "Expected `via', not `%s'\n",
-               tok);
-      return 1;
-    }
+  {
+    fprintf (stderr,
+             "Expected `via', not `%s'\n",
+             tok);
+    return 1;
+  }
   tok = strtok (NULL, " ");
   if ( (NULL == tok) ||
        (1 != inet_pton (AF_INET,
                         tok,
                         next_hop)) )
-    {
-      fprintf (stderr,
-               "Expected next hop, not `%s'\n",
-               tok);
-      return 1;
-    }
+  {
+    fprintf (stderr,
+             "Expected next hop, not `%s'\n",
+             tok);
+    return 1;
+  }
   tok = strtok (NULL, " ");
   if ( (NULL == tok) ||
        (0 != strcasecmp ("dev",
                          tok)))
-    {
-      fprintf (stderr,
-               "Expected `dev', not `%s'\n",
-               tok);
-      return 1;
-    }
+  {
+    fprintf (stderr,
+             "Expected `dev', not `%s'\n",
+             tok);
+    return 1;
+  }
   tok = strtok (NULL, " ");
   *ifc = find_interface (tok);
   if (NULL == *ifc)
-    {
-      fprintf (stderr,
-               "Interface `%s' unknown\n",
-               tok);
-      return 1;
-    }
+  {
+    fprintf (stderr,
+             "Interface `%s' unknown\n",
+             tok);
+    return 1;
+  }
   return 0;
 }
 
@@ -785,12 +787,12 @@ parse_network_arg (struct Interface *ifc,
       strncasecmp (net,
                    "IPV4:",
                    strlen ("IPV4:")))
-    {
-      fprintf (stderr,
-               "Interface specification `%s' does not start with `IPV4:'\n",
-               net);
-      return 1;
-    }
+  {
+    fprintf (stderr,
+             "Interface specification `%s' does not start with `IPV4:'\n",
+             net);
+    return 1;
+  }
   net += strlen ("IPV4:");
   return parse_network (&ifc->ip,
                         &ifc->netmask,
@@ -816,64 +818,64 @@ parse_cmd_arg (struct Interface *ifc,
   ifc->mtu = 1500; /* default in case unspecified */
   tok = strchr (arg, '[');
   if (NULL == tok)
-    {
-      fprintf (stderr,
-               "Error in interface specification: lacks '['");
-      return 1;
-    }
+  {
+    fprintf (stderr,
+             "Error in interface specification: lacks '['");
+    return 1;
+  }
   ifc->name = strndup (arg,
                        tok - arg);
   arg = tok + 1;
   tok = strchr (arg, ']');
   if (NULL == tok)
-    {
-      fprintf (stderr,
-               "Error in interface specification: lacks ']'");
-      return 1;
-    }
+  {
+    fprintf (stderr,
+             "Error in interface specification: lacks ']'");
+    return 1;
+  }
   nspec = strndup (arg,
                    tok - arg);
   if (0 !=
       parse_network_arg (ifc,
                          nspec))
-    {
-      free (nspec);
-      return 1;
-    }
+  {
+    free (nspec);
+    return 1;
+  }
   free (nspec);
   arg = tok + 1;
   if ('=' == arg[0])
-    {
-      unsigned int mtu;
+  {
+    unsigned int mtu;
 
-      if (1 != (sscanf (&arg[1],
-                        "%u",
-                        &mtu)))
-        {
-          fprintf (stderr,
-                   "Error in interface specification: MTU not a number\n");
-          return 1;
-        }
-      if (mtu < 400)
-        {
-          fprintf (stderr,
-                   "Error in interface specification: MTU too small\n");
-          return 1;
-        }
-      if (mtu > UINT16_MAX)
-        {
-          fprintf (stderr,
-                   "Error in interface specification: MTU too large\n");
-          return 1;
-        }
-      ifc->mtu = mtu;
-#if DEBUG
+    if (1 != (sscanf (&arg[1],
+                      "%u",
+                      &mtu)))
+    {
       fprintf (stderr,
-               "Interface %s has MTU %u\n",
-               ifc->name,
-               (unsigned int) ifc->mtu);
-#endif
+               "Error in interface specification: MTU not a number\n");
+      return 1;
     }
+    if (mtu < 400)
+    {
+      fprintf (stderr,
+               "Error in interface specification: MTU too small\n");
+      return 1;
+    }
+    if (mtu > UINT16_MAX)
+    {
+      fprintf (stderr,
+               "Error in interface specification: MTU too large\n");
+      return 1;
+    }
+    ifc->mtu = mtu;
+#if DEBUG
+    fprintf (stderr,
+             "Interface %s has MTU %u\n",
+             ifc->name,
+             (unsigned int) ifc->mtu);
+#endif
+  }
   return 0;
 }
 
@@ -886,25 +888,25 @@ parse_cmd_arg (struct Interface *ifc,
  */
 static void
 handle_control (char *cmd,
-		size_t cmd_len)
+                size_t cmd_len)
 {
   const char *tok;
 
   cmd[cmd_len - 1] = '\0';
   tok = strtok (cmd,
-		" ");
+                " ");
   if (NULL == tok)
     return;
   if (0 == strcasecmp (tok,
-		       "arp"))
+                       "arp"))
     process_cmd_arp ();
   else if (0 == strcasecmp (tok,
-			    "route"))
+                            "route"))
     process_cmd_route ();
   else
     fprintf (stderr,
-	     "Unsupported command `%s'\n",
-	     tok);
+             "Unsupported command `%s'\n",
+             tok);
 }
 
 
@@ -916,7 +918,7 @@ handle_control (char *cmd,
  */
 static void
 handle_mac (uint16_t ifc_num,
-	    const struct MacAddress *mac)
+            const struct MacAddress *mac)
 {
   if (ifc_num > num_ifc)
     abort ();
@@ -941,22 +943,22 @@ main (int argc,
   struct Interface ifc[argc];
 
   memset (ifc,
-	  0,
-	  sizeof (ifc));
+          0,
+          sizeof (ifc));
   num_ifc = argc - 1;
   gifc = ifc;
-  for (unsigned int i=1;i<argc;i++)
+  for (unsigned int i = 1; i<argc; i++)
   {
-    struct Interface *p = &ifc[i-1];
+    struct Interface *p = &ifc[i - 1];
 
-    ifc[i-1].ifc_num = i;
+    ifc[i - 1].ifc_num = i;
     if (0 !=
         parse_cmd_arg (p,
                        argv[i]))
       abort ();
   }
   loop ();
-  for (unsigned int i=1;i<argc;i++)
-    free (ifc[i-1].name);
+  for (unsigned int i = 1; i<argc; i++)
+    free (ifc[i - 1].name);
   return 0;
 }

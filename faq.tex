@@ -362,6 +362,23 @@ Your USB port may also supply insufficient power to the USB adapter.
 In this case, try another port.
 
 
+\section{Protocol details}
+
+\subsection{MTU $=$ 1500?}
+
+When we traditionally speak of an MTU of 1500 for Ethernet, this
+{\em excludes} the Ethernet header (and CRC, and preamble).  When
+reporting the MTU in an ICMP ``fragmentation needed'' message,
+the Ethernet header is also excluded (layer 3!).
+
+Note that the MTU command-line argument (!) for the {\tt router} {\em
+  includes} the Ethernet header (see check in {\tt forward\_to})
+largely because the code was written to also enable VLANs and thus
+different Ethernet header sizes are possible. So to achieve the
+traditional Ethernet MTU of 1500 bytes, you would need to specify 1514
+on the command-line --- and subtract the size of the Ethernet header
+when generating the ICMP message.
+
 
 \end{document}
 

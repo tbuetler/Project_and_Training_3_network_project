@@ -116,10 +116,11 @@ Implement {\tt router} which routes IPv4 packets:
 \item Make sure to decrement the TTL field and recompute the CRC.
   % add link to logic implementing CRC?
 \item Generate ICMP messages for ``no route to network'' (ICMP
-    Type 3, Code 0) and ``TTL exceeded'' (ICMP Type 3, Code 4).
+    Type 3, Code 0) and ``TTL exceeded'' (ICMP Type 11, Code 0),
 \item Support the syntax {\tt IFC[RO]=MTU} where {\tt MTU} is the
   MTU for IFC.  Example: {\tt eth0=1500}.  Implement and test IPv4 fragmentation
-  (including {\em do not fragment}-flag support).
+  (including {\em do not fragment}-flag support), including sending
+  ICMP  (ICMP Type 3, Code 4).
 \item Support dynamic updates to the routing table via {\tt stdin}.
   Base your commands on the {\tt ip route} tool.  For example,
   ``route list'' should output the routing table, and

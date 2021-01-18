@@ -112,7 +112,7 @@ Implement {\tt router} which routes IPv4 packets:
 \item Use the ARP logic to resolve the target MAC address.  You MUST
   simply drop IP packets for destinations where you do not yet have the
   next hop's MAC address, but you MUST then issue the ARP request to
-  obtain the destination's MAC instead (once per dropped IP packet).
+  obtain the next hop or destination's MAC instead (once per dropped IP packet).
 \item Make sure to decrement the TTL field and recompute the CRC.
   % add link to logic implementing CRC?
 \item Generate ICMP messages for ``no route to network'' (ICMP

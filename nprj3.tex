@@ -59,18 +59,7 @@ There will be three main deliverables for the sprint:
 \end{description}
 
 All deliverables must be submitted to Git (master branch)
-by {\bf January 22nd 2021, 18:00 CET}.
-
-
-\subsection{Team}
-
-You are expected to work in a team of four students. The suggested
-division of work is:
-\begin{description}
-\item[1 Student] Scrum master, also responsible for the documentation
-\item[1 Student] Implementation
-\item[2 Students] Testing
-\end{description}
+by the submission deadline indicated on Moodle.
 
 
 \subsection{Grading}
@@ -95,7 +84,7 @@ We will specifically also look for the following properties of a router:
 \item Correct IP fragmentation? % Use eth3 for testing
 \end{itemize}
 
-Parial points are awarded.
+Partial points are awarded.
 
 You can earn 16, 15 and 19 points in the three networking sprints, for
 a total of 50 points.  You need {\bf 37 points} to pass the networking
@@ -109,10 +98,10 @@ Implement {\tt router} which routes IPv4 packets:
 \item Populate your routing table from the network interface configuration
   given on the command-line using the same syntax as with the {\tt arp}
   program.
-\item Use the ARP logic to resolve the target MAC address.  You MUST
-  simply drop IP packets for destinations where you do not yet have the
-  next hop's MAC address, but you MUST then issue the ARP request to
-  obtain the next hop or destination's MAC instead (once per dropped IP packet).
+\item Use the ARP logic to resolve the target MAC address.   Simply drop the IP
+  packets for destinations where the next hop's MAC address has not yet been
+  learned, and issue the ARP request to obtain the destination’s MAC instead
+  (once per dropped IP packet).
 \item Make sure to decrement the TTL field and recompute the CRC.
   % add link to logic implementing CRC?
 \item Generate ICMP messages for ``no route to network'' (ICMP

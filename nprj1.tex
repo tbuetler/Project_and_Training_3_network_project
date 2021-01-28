@@ -57,7 +57,7 @@ There will be three main deliverables for the sprint:
 \end{description}
 
 All deliverables must be submitted to Git (master branch)
-by {\bf November 4th 2020, 18:00 CET}.
+by the submission deadline announced on Moodle.
 
 \subsection{Team}
 
@@ -91,7 +91,7 @@ We will specifically also look for the following properties of a switch:
   addresses.  Ensure your switch's learning table uses finite memory.
 \end{itemize}
 
-Parial points are awarded.
+Partial points are awarded.
 
 You can earn 16, 15 and 19 points in the three networking sprints, for
 a total of 50 points.  You need {\bf 37 points} to pass the networking
@@ -165,14 +165,16 @@ virtual machine.
 To access the hardware, your final program should be {\em executed}
 by the {\tt network-driver}.  For this, you call
 \begin{verbatim}
-$ network-driver IFC1 ... IFCn - switch ARGS
+$ network-driver IFC1 ... IFCn - ./switch ARGS
 \end{verbatim}
-where ``IFC1 ... IFCn'' is the list of interface names that you
-want {\tt network-driver} to support (i.e. ``lan0'', ``lan1'')
-and ``PROG'' is the name of your binary and ``ARGS'' are the
-command-line arguments to ``PROG''.  Note the ``-'' (single minus)
-between the last interface name and ``PROG''.  Also, ``PROG'' must
-be given with the path or be in the PATH.
+where ``IFC1 ... IFCn'' is the list of interface names that you want
+{\tt network-driver} to support (i.e. ``lan0'', ``lan1'') and ``PROG''
+is the name of your binary and ``ARGS'' are the command-line arguments
+to ``switch''.  Note the ``-'' (single minus) between the last
+interface name and ``switch''.  Also, ``./switch'' must be given with
+its path (i.e. ``./switch'' for the current working directory) or be
+located in a directory that is given in the ``PATH'' environment
+variable.
 
 Once you start {\tt switch} like this, you can read Ethernet frames
 and end-user commands from ``stdin'' and write Ethernet
@@ -185,7 +187,7 @@ You will {\bf not} be communicating directly with the console!
 
 \subsection{Build the driver}
 
-To comple the code, run:
+To compile the code, run:
 \begin{verbatim}
 # This requires gcc
 $ make
@@ -250,8 +252,8 @@ provide a significant advantage for implementations in C.
 \item[glab.h]{A struct defining a MAC Address and a few common C includes. (90 LOC)}
 \item[print.c]{This file shows how to wrap messages to print them
   via the driver. (112 LOC)}
-\item[loop.c]{This could be the main loop of your application. Includes
-  some basic logic to look at each frame, decide whether it is the MACs,
+\item[loop.c]{This could be the main loop of your application. The code includes
+  some basic logic that looks at each frame, decides whether it is the MACs,
   control or an Ethernet frame and then calls the respective function. (93 LOC)}
 \item[crc.c]{An implementation of checksum algorithms. (194 LOC)}
 \end{description}
@@ -322,7 +324,8 @@ Properties to consider for a virtual switch:
 \item Correct switching? Is learning correctly implemented?
 \item Are VLAN tags added/stripped?
 \item Are correct limitations imposed on VLANs?
-      Is say $VID=4$ not forwarded to eth2/eth3?
+  For example using the configuration above, you might check that
+  frames with $VID=2$ are not forwarded to eth1.
 \end{itemize}
 
 

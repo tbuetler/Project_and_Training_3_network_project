@@ -29,7 +29,7 @@
  * Using this still causes structs to be unaligned on the stack on Sparc
  * (See #670578 from Debian).
  */
-_Pragma ("pack(push)") _Pragma ("pack(1)")
+_Pragma("pack(push)") _Pragma ("pack(1)")
 
 struct EthernetHeader
 {
@@ -94,7 +94,7 @@ struct ArpHeaderEthernetIPv4
   struct in_addr target_pa;
 };
 
-_Pragma ("pack(pop)")
+_Pragma("pack(pop)")
 
 
 /**
@@ -365,7 +365,7 @@ parse_cmd_arg (struct Interface *ifc,
   const char *tok;
   char *nspec;
 
-  ifc->mtu = 1500; /* default in case unspecified */
+  ifc->mtu = 1500 + sizeof (struct EthernetHeader); /* default in case unspecified */
   tok = strchr (arg, '[');
   if (NULL == tok)
   {
@@ -412,6 +412,7 @@ parse_cmd_arg (struct Interface *ifc,
                "Error in interface specification: MTU too small\n");
       return 1;
     }
+    ifc->mtu = mtu + sizeof (struct EthernetHeader);
   }
   return 0;
 }

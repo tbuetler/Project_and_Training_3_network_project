@@ -815,7 +815,7 @@ parse_cmd_arg (struct Interface *ifc,
   const char *tok;
   char *nspec;
 
-  ifc->mtu = 1500; /* default in case unspecified */
+  ifc->mtu = 1500 + sizeof (struct EthernetHeader); /* default in case unspecified */
   tok = strchr (arg, '[');
   if (NULL == tok)
   {
@@ -868,7 +868,7 @@ parse_cmd_arg (struct Interface *ifc,
                "Error in interface specification: MTU too large\n");
       return 1;
     }
-    ifc->mtu = mtu;
+    ifc->mtu = mtu + sizeof (struct EthernetHeader);
 #if DEBUG
     fprintf (stderr,
              "Interface %s has MTU %u\n",

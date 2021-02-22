@@ -91,7 +91,22 @@ Implement {\tt router} which routes IPv4 packets:
   {\tt del}etable.
 \end{enumerate}
 
-Specifically, your implementation must realize following functions of a router:
+The output of your routing table should have the following format:
+\begin{verbatim}
+192.168.0.0/255.255.0.0 -> 1.2.3.4 (eth0)
+\end{verbatim}
+Use 0.0.0.0 if there is no next hop (the target host is in the connected
+LAN on the specified interface).  You may print the routing table
+in any order. Do include locally connected networks.
+
+Routing table entries for locally connected networks MUST NOT be
+configured explictly (via ``route add``) but must be automatically
+created when your router starts (from the command-line arguments). You
+do not have to support removal of those routing table entries.
+
+
+Note that your implementation must realize following functions of a
+router:
 
 \begin{itemize}
 \item Basic IP handling (TTL, ICMP, Checksum) % IP TTL decremented, ICMP? Checksum?

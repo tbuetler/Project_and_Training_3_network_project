@@ -19,3 +19,15 @@ clean:
 
 $(programs): %: %.c glab.h loop.c print.c
 	gcc $(CFLAGS) $< -o $@
+
+check: check-switch check-arp check-router
+
+check-switch: test-switch
+	./test-switch ./switc
+check-arp: test-arp
+	./test-arp ./arp
+check-router: test-router
+	./test-router ./router
+
+
+.PHONY: clean check check-switch check-arp check-router

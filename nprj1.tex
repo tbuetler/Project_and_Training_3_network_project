@@ -41,11 +41,8 @@ specifications on the Internet.
 
 There will be three main deliverables for the sprint:
 \begin{description}
-\item[Documentation] You must document the main
-  data structure (switching table), the switching algorithm
-  and a {\bf comprehensive test plan}.
-\item[Implementation] You must implement the switching
-  algorithm, extending the {\tt switch.c} template provided
+\item[Implementation] You must {\bf implement the switching
+  algorithm}, extending the {\tt switch.c} template provided
   (or write the entire logic from scratch in another language).
 \item[Testing] You must implement and submit your own {\bf test cases}
   by {\em pretending} to be the network driver (see below) and sending
@@ -54,34 +51,13 @@ There will be three main deliverables for the sprint:
   {\bf document} {\em interoperability} tests against existing
   implementations (i.e. other notebooks from your team to ensure that
   your switch integrates correctly with other implementations).
-\end{description}
-
-All deliverables must be submitted to Git (master branch)
-by the submission deadline announced on Moodle.
-
-\subsection{Team}
-
-You are expected to work in a team of four students. The suggested
-division of work is:
-\begin{description}
-\item[1 Student] Scrum master, also responsible for the documentation
-\item[1 Student] Implementation
-\item[2 Students] Testing
+\item[Design and documentation] You must design the main
+  data structure (switching table), the switching algorithm
+  and create a {\bf comprehensive test plan}.
 \end{description}
 
 
-\subsection{Grading}
-
-You get points for each of the key deliverables:
-\begin{center}
-\begin{tabular}{l|r}
-Technical documentation (A\&D, test plan) &  3 \\ \hline
-Correct implementation                    &  7 \\ \hline
-Comprehensive test cases                  &  4 \\ \hline
-Quality of English in documentation       &  2 \\ \hline \hline
-Total                                     & 16
-\end{tabular}
-\end{center}
+\subsection{Functionality}
 
 We will specifically also look for the following properties of a switch:
 \begin{itemize}
@@ -91,11 +67,140 @@ We will specifically also look for the following properties of a switch:
   addresses.  Ensure your switch's learning table uses finite memory.
 \end{itemize}
 
-Partial points are awarded.
+\subsection{Testing}
+
+For your test plans, please make sure to supply the
+following information for each test:
+
+\begin{itemize}
+  \item Test Case ID --- This field uniquely identifies a test case.
+  \item Test case Description/Summary --- This field describes the test case objective.
+  \item Pre-requisites --- This field specifies the conditions or steps that must be followed before the test steps executions.
+  \item Test steps --- In this field, the exact steps are mentioned for performing the test case.
+  \item Expected Results --- successful test
+  \item Author --- Name of the Tester.
+  \item Automation --- Whether this test case is automated or not.
+  \item Status --- Pass/fail with date and code version.
+\end{itemize}
+
+Note that in addition to automated tests similar to the {\tt
+  public-test-switch} you {\bf should} probably do integration tests
+in a real network (evaluating manually with ping, wireshark, etc.).
+This will help you find problems in your implementation and ensure
+that your understanding of the network protocols is correct. Such
+integration tests should be documented and will be graded as part of
+the technical documentation.
+
+
+\subsection{Design and Documentation}
+
+The final documentation should include:
+  \begin{itemize}
+  \item Title page with group number and names/kurzel of all participants.
+  \item Table of contents
+  \item Introduction text (mention objectives and targeted audience)
+  \item Data structure (switching table)
+  \item Algorithm (switching algorithm) (use UML state diagram)
+  \item Test strategy
+  \item Product backlog and sprint backlog (Scrum)
+  \item Glossary
+  \item Bibliography
+\end{itemize}
+
+Text throughout must explain methods as well as justifications for
+choices made (why not other choices). The organisation should clearly
+indicate sections and sub-sections.  The language should have a
+consistent voice with a fairly consistent register (semi-formal).  The
+goal is clarity with minimal repetition.  Concise language techniques
+(relative clauses, linking words...) are expected to be employed
+without forfeiting clarity.  You should also use appropriate graphical
+representations and pay attention to how you visualize code.
+Algorithms and data structures should be presented in diagrams or with
+pseudo-code, but NOT in C syntax.
+
+Documentation must be written in Markup and included in the Git, {\bf
+  but} must also be submitted by the deadline as a PDF to the
+respective Moodle assignment folder for grading by the English
+professors.
+
+
+\section{Grading}
+
+{\bf All deliverables must be submitted to Git} (master branch) by the
+submission deadline announced on Moodle. The PDF files generated from
+the Markup documentation must {\bf additionally be submitted via Moodle}.
+
+You are expected to work in a team of {\bf four students}.  If needed,
+Prof. Grothoff may permit the creation of a team of 5 students or
+teams of 3 students.  Each team is responsible for dividing up the
+work and coordinating as needed (SCRUM).
 
 You can earn 16, 15 and 19 points in the three networking sprints, for
 a total of 50 points.  You need {\bf 37 points} to pass the networking
 component of BTI 3021.
+
+If your team is {\bf for good reasons} smaller than four students, the
+passing threshold will be lowered by {\bf 2 points} per ``missing''
+student per sprint.  So a student going alone would still need {\bf 19
+  points} to pass.
+
+Teams may {\bf request} changes to team membership at the end of a
+sprint, but must provide a {\bf justification} to the course
+coordinator, who may approve or decline the request.
+
+
+
+\subsection{Switch grading}
+
+For the {\bf switch} sprint, you get points for each of the key deliverables:
+\begin{center}
+\begin{tabular}{l|r}
+Correct implementation                    &  7 \\ \hline
+Comprehensive test cases                  &  4 \\ \hline
+Technical documentation (A\&D, test plan) &  3 \\ \hline
+Quality of English in documentation       &  2 \\ \hline \hline
+Total                                     & 16
+\end{tabular}
+\end{center}
+
+\subsubsection{Correct implementation}
+\begin{itemize}
+\item 3 points for passing public test cases
+\item 4 points for passing secret test cases (see Section~\ref{sec:binaries})
+\end{itemize}
+
+\subsubsection{Comprehensive test cases}
+\begin{itemize}
+\item 0 points if public reference implementation (see Section~\ref{sec:binaries})
+      fails test cases, {\bf otherwise}
+\item 2 points for failing public buggy implementation (see Section~\ref{sec:binaries}),
+       plus
+\item 2 points for finding bugs in secret buggy implementation(s)
+\end{itemize}
+
+If you believe you have found a bug in the provided reference
+implementation, you are encouraged to discuss it with the
+instructor. If you have found an actual bug in the reference
+implementation (that is within the scope of the assignment), you will
+be awarded a {\bf bonus point} per acknowledged bug.
+
+
+\subsubsection{Technical documentation}
+\begin{itemize}
+\item 1 point for good description of data structure
+\item 1 point for good description of switching algorithm
+\item 1 point for good description of test cases
+\end{itemize}
+Partial points may be awarded.
+
+\subsubsection{Quality of the English in the documentation}
+
+\begin{itemize}
+\item 1 point for organisation / comprehension / consistency
+\item 1 point for correct grammar / spelling / punctuation
+\end{itemize}
+Partial points may be awarded.
+
 
 
 \section{Hardware}
@@ -266,6 +371,46 @@ The main file for the exercise is {\tt switch.c}. In this file, you should
 implement a program {\tt switch} which forwards frames received on any
 interface to any other interface, but passively learns MAC addresses
 and optimizes subsequent traffic.
+
+
+\section{Provided binaries} \label{sec:binaries}
+
+You are provided with several binaries:
+\begin{description}
+\item[public-test-switch] A public test case, run using ``./public-test-switch ./switch''
+  to test your switch. Returns 0 on success.
+\item[public-switch] Reference implementation of the ``switch''.
+\item[public-bug-switch] Buggy implementation of a ``switch``.
+\end{description}
+
+
+\section{Required make targets}
+
+You may modify the build system. However, the final build system must
+have the following {\tt make} targets:
+
+\begin{description}
+\item[all] build all binaries
+\item[clean] remove all compiled files
+\item[switch] build your ``switch`` binary from source; the binary MUST end up in the top-level directory of your build tree.
+\item[test-switch] build your ``test-switch`` program from source; the program MUST end up in the top-level directory of your build tree.
+\item[check-switch] Run ``test-switch`` against the ``switch'' binary.
+\end{description}
+
+For grading, we will basically run commands like:
+\begin{verbatim}
+GRADE=0
+$ make test-switch
+$ cp public-bug-switch switch
+$ make check-switch || GRADE=`expr $GRADE + 2`
+$ cp private-bug-switch switch
+$ make check-switch || GRADE=`expr $GRADE + 2`
+$ cp public-switch switch
+$ make check-switch || GRADE=0
+echo "Test grade: $GRADE"
+\end{verbatim}
+You must thus make sure the build system continues to create programs in the
+right (top-level) location!
 
 
 \section{Warm-up exercises}

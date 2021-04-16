@@ -216,54 +216,12 @@ Ethernet USB adapter.  Instead, you will use the provided
 {\tt network-driver} which can already provide you with raw access
 to any Ethernet interface (incl. WLAN).
 
-
 \subsection{Alternative setup with virtual machines}
 
-Download a basic qemu VM, for example from
-\url{https://people.debian.org/~aurel32/qemu/amd64/}.
 
-Then launch your router with four network interfaces and
-the respective up scripts and disjoint MACs:
-\begin{verbatim}
-# qemu-system-x86_64 -hda wheezy.qcov2 \
-   -device e1000,netdev=net0,mac=10:10:A0:D0:C0:B1 \
-   -netdev socket,id=net0,listen=:10001 \
-   -device e1000,netdev=net1,mac=10:10:A0:D0:C0:B2 \
-   -netdev socket,id=net0,listen=:10002 \
-   -device e1000,netdev=net2,mac=10:10:A0:D0:C0:B3 \
-   -netdev socket,id=net0,listen=:10003 \
-   -device e1000,netdev=net3,mac=10:10:A0:D0:C0:B4 \
-   -netdev socket,id=net0,listen=:10004
-\end{verbatim}
-Then, launch additional VMs to connect ``other'' systems
-to your router:
-\begin{verbatim}
-# cp wheezy.qcov2 wheezy0.qcov
-# qemu-system-x86_64 -hda wheezy0.qcov2 \
-   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B1 \
-   -netdev socket,id=net0,connect:10001
-# cp wheezy.qcov2 wheezy1.qcov
-# qemu-system-x86_64 -hda wheezy1.qcov2 \
-   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B2 \
-   -netdev socket,id=net0,connect:10002
-# cp wheezy.qcov2 wheezy2.qcov
-# qemu-system-x86_64 -hda wheezy2.qcov2 \
-   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B3 \
-   -netdev socket,id=net0,connect:10003
-# cp wheezy.qcov2 wheezy3.qcov
-# qemu-system-x86_64 -hda wheezy3.qcov2 \
-   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B4 \
-   -netdev socket,id=net0,connect:10004
-\end{verbatim}
-You may want to link up your VMs to your host to copy files:
-\begin{verbatim}
-# qemu-system-x86_64 ...
-  -net nic -net user,hostfwd=tcp::5555-:22
-\end{verbatim}
-Now your localhost port 5555 is forwarded to port 22 of the
-virtual machine.
-
-
+Clone the Git repository at
+\url{https://gitlab.ti.bfh.ch/demos/vlab} and follow the provided
+instructions.
 
 \section{The {\tt network-driver}}
 
@@ -475,3 +433,52 @@ Properties to consider for a virtual switch:
 
 
 \end{document}
+
+
+\subsection{Alternative setup with qemu}
+
+
+
+Download a basic qemu VM, for example from
+\url{https://people.debian.org/~aurel32/qemu/amd64/}.
+
+Then launch your router with four network interfaces and
+the respective up scripts and disjoint MACs:
+\begin{verbatim}
+# qemu-system-x86_64 -hda wheezy.qcov2 \
+   -device e1000,netdev=net0,mac=10:10:A0:D0:C0:B1 \
+   -netdev socket,id=net0,listen=:10001 \
+   -device e1000,netdev=net1,mac=10:10:A0:D0:C0:B2 \
+   -netdev socket,id=net0,listen=:10002 \
+   -device e1000,netdev=net2,mac=10:10:A0:D0:C0:B3 \
+   -netdev socket,id=net0,listen=:10003 \
+   -device e1000,netdev=net3,mac=10:10:A0:D0:C0:B4 \
+   -netdev socket,id=net0,listen=:10004
+\end{verbatim}
+Then, launch additional VMs to connect ``other'' systems
+to your router:
+\begin{verbatim}
+# cp wheezy.qcov2 wheezy0.qcov
+# qemu-system-x86_64 -hda wheezy0.qcov2 \
+   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B1 \
+   -netdev socket,id=net0,connect:10001
+# cp wheezy.qcov2 wheezy1.qcov
+# qemu-system-x86_64 -hda wheezy1.qcov2 \
+   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B2 \
+   -netdev socket,id=net0,connect:10002
+# cp wheezy.qcov2 wheezy2.qcov
+# qemu-system-x86_64 -hda wheezy2.qcov2 \
+   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B3 \
+   -netdev socket,id=net0,connect:10003
+# cp wheezy.qcov2 wheezy3.qcov
+# qemu-system-x86_64 -hda wheezy3.qcov2 \
+   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B4 \
+   -netdev socket,id=net0,connect:10004
+\end{verbatim}
+You may want to link up your VMs to your host to copy files:
+\begin{verbatim}
+# qemu-system-x86_64 ...
+  -net nic -net user,hostfwd=tcp::5555-:22
+\end{verbatim}
+Now your localhost port 5555 is forwarded to port 22 of the
+virtual machine.

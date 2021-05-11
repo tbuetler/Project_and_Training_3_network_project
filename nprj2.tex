@@ -87,7 +87,11 @@ The goal is to implement a program {\tt arp} that:
   \begin{enumerate}
   \item
   If the {\tt IP-ADDR} is in the ARP cache, the program must immediately
-  output the associated {\em MAC}.
+  output the associated {\em MAC}:
+  \begin{verbatim}
+28:c6:3f:1a:0a:bf
+\end{verbatim}
+  {\bf NOTE: the format requirement was clarified recently.}
   \item
   If the {\tt IP-ADDR} is {\bf not} in the ARP cache, the program should {\em only}
   issue the ARP query for those IPv4 addresses.

@@ -124,8 +124,8 @@ static struct Interface *gifc;
  */
 static void
 parse_frame (struct Interface *ifc,
-	     const void *frame,
-	     size_t frame_size)
+             const void *frame,
+             size_t frame_size)
 {
   const uint8_t *framec = frame;
   struct EthernetHeader eh;
@@ -133,12 +133,12 @@ parse_frame (struct Interface *ifc,
   if (frame_size < sizeof (eh))
   {
     fprintf (stderr,
-	     "Malformed frame\n");
+             "Malformed frame\n");
     return;
   }
   memcpy (&eh,
-	  frame,
-	  sizeof (eh));
+          frame,
+          sizeof (eh));
   /* DO work here! */
 }
 
@@ -152,14 +152,14 @@ parse_frame (struct Interface *ifc,
  */
 static void
 handle_frame (uint16_t interface,
-	      const void *frame,
-	      size_t frame_size)
+              const void *frame,
+              size_t frame_size)
 {
   if (interface > num_ifc)
     abort ();
   parse_frame (&gifc[interface - 1],
-	       frame,
-	       frame_size);
+               frame,
+               frame_size);
 }
 
 
@@ -171,7 +171,7 @@ handle_frame (uint16_t interface,
  */
 static void
 handle_control (char *cmd,
-		size_t cmd_len)
+                size_t cmd_len)
 {
   cmd[cmd_len - 1] = '\0';
   fprintf (stderr,
@@ -188,7 +188,7 @@ handle_control (char *cmd,
  */
 static void
 handle_mac (uint16_t ifc_num,
-	    const struct MacAddress *mac)
+            const struct MacAddress *mac)
 {
   if (ifc_num > num_ifc)
     abort ();
@@ -208,9 +208,9 @@ handle_mac (uint16_t ifc_num,
  */
 static int
 parse_tagged (const char *start,
-	      const char *end,
-	      int off,
-	      struct Interface *ifc)
+              const char *end,
+              int off,
+              struct Interface *ifc)
 {
   char *spec;
   unsigned int pos;
@@ -218,13 +218,13 @@ parse_tagged (const char *start,
   if (':' != *start)
   {
     fprintf (stderr,
-	     "Tagged definition for interface #%d lacks ':'\n",
-	     off);
+             "Tagged definition for interface #%d lacks ':'\n",
+             off);
     return 1;
   }
   start++;
   spec = strndup (start,
-		  end - start);
+                  end - start);
   if (NULL == spec)
   {
     perror ("strndup");
@@ -232,37 +232,37 @@ parse_tagged (const char *start,
   }
   pos = 0;
   for (const char *tok = strtok (spec,
-				 ",");
+                                 ",");
        NULL != tok;
        tok = strtok (NULL,
-		     ","))
+                     ","))
   {
     unsigned int tag;
 
     if (pos == MAX_VLANS)
     {
       fprintf (stderr,
-	       "Too many VLANs specified for interface #%d\n",
-	       off);
+               "Too many VLANs specified for interface #%d\n",
+               off);
       free (spec);
       return 1;
     }
     if (1 != sscanf (tok,
-		     "%u",
-		     &tag))
+                     "%u",
+                     &tag))
     {
       fprintf (stderr,
-	       "Expected number in tagged definition for interface #%d\n",
-	       off);
+               "Expected number in tagged definition for interface #%d\n",
+               off);
       free (spec);
       return 1;
     }
     if (tag > MAX_VLANS)
     {
       fprintf (stderr,
-	       "%u is too large for a 802.1Q VLAN ID (on interface #%d)\n",
-	       tag,
-	       off);
+               "%u is too large for a 802.1Q VLAN ID (on interface #%d)\n",
+               tag,
+               off);
       free (spec);
       return 1;
     }
@@ -286,9 +286,9 @@ parse_tagged (const char *start,
  */
 static int
 parse_untagged (const char *start,
-		const char *end,
-		int off,
-		struct Interface *ifc)
+                const char *end,
+                int off,
+                struct Interface *ifc)
 {
   char *spec;
   unsigned int tag;
@@ -296,34 +296,34 @@ parse_untagged (const char *start,
   if (':' != *start)
   {
     fprintf (stderr,
-	     "Untagged definition for interface #%d lacks ':'\n",
-	     off);
+             "Untagged definition for interface #%d lacks ':'\n",
+             off);
     return 1;
   }
   start++;
   spec = strndup (start,
-		  end - start);
+                  end - start);
   if (NULL == spec)
   {
     perror ("strndup");
     return 1;
   }
   if (1 != sscanf (spec,
-		   "%u",
-		   &tag))
+                   "%u",
+                   &tag))
   {
     fprintf (stderr,
-	     "Expected number in untagged definition for interface #%d\n",
-	     off);
+             "Expected number in untagged definition for interface #%d\n",
+             off);
     free (spec);
     return 1;
   }
   if (tag > MAX_VLANS)
   {
     fprintf (stderr,
-	     "%u is too large for a 802.1Q VLAN ID (on interface #%d)\n",
-	     tag,
-	     off);
+             "%u is too large for a 802.1Q VLAN ID (on interface #%d)\n",
+             tag,
+             off);
     free (spec);
     return 1;
   }
@@ -343,8 +343,8 @@ parse_untagged (const char *start,
  */
 static int
 parse_vlan_args (const char *arg,
-		 int off,
-		 struct Interface *ifc)
+                 int off,
+                 struct Interface *ifc)
 {
   const char *openbracket;
   const char *closebracket;
@@ -352,7 +352,7 @@ parse_vlan_args (const char *arg,
   ifc->tagged_vlans[0] = NO_VLAN;
   ifc->untagged_vlan = NO_VLAN;
   openbracket = strchr (arg,
-			(unsigned char) '[');
+                        (unsigned char) '[');
   if (NULL == openbracket)
   {
     ifc->ifc_name = strdup (arg);
@@ -365,7 +365,7 @@ parse_vlan_args (const char *arg,
     return 0;
   }
   ifc->ifc_name = strndup (arg,
-			   openbracket - arg);
+                           openbracket - arg);
   if (NULL == ifc->ifc_name)
   {
     perror ("strndup");
@@ -373,33 +373,33 @@ parse_vlan_args (const char *arg,
   }
   openbracket++;
   closebracket = strchr (openbracket,
-			 (unsigned char) ']');
+                         (unsigned char) ']');
   if (NULL == closebracket)
   {
     fprintf (stderr,
-	     "Interface definition #%d includes '[' but lacks ']'\n",
-	     off);
+             "Interface definition #%d includes '[' but lacks ']'\n",
+             off);
     return 1;
   }
   switch (*openbracket)
   {
   case 'T':
     return parse_tagged (openbracket + 1,
-			 closebracket,
-			 off,
-			 ifc);
+                         closebracket,
+                         off,
+                         ifc);
     break;
   case 'U':
     return parse_untagged (openbracket + 1,
-			   closebracket,
-			   off,
-			   ifc);
+                           closebracket,
+                           off,
+                           ifc);
     break;
   default:
     fprintf (stderr,
-	     "Unsupported tagged/untagged specification `%c' in interface definition #%d\n",
-	     *openbracket,
-	     off);
+             "Unsupported tagged/untagged specification `%c' in interface definition #%d\n",
+             *openbracket,
+             off);
     return 1;
   }
 }
@@ -419,21 +419,21 @@ int
 main (int argc,
       char **argv)
 {
-  struct Interface ifc[argc-1];
+  struct Interface ifc[argc - 1];
 
   (void) print;
   memset (ifc,
-	  0,
-	  sizeof (ifc));
+          0,
+          sizeof (ifc));
   num_ifc = argc - 1;
   gifc = ifc;
-  for (unsigned int i=1;i<argc;i++)
+  for (unsigned int i = 1; i<argc; i++)
   {
-    ifc[i-1].ifc_num = i;
+    ifc[i - 1].ifc_num = i;
     if (0 !=
-	parse_vlan_args (argv[i],
-			 i,
-			 &ifc[i-1]))
+        parse_vlan_args (argv[i],
+                         i,
+                         &ifc[i - 1]))
       return 1;
   }
   loop ();

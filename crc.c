@@ -11,7 +11,7 @@
      WITHOUT ANY WARRANTY; without even the implied warranty of
      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
      Affero General Public License for more details.
-    
+
      You should have received a copy of the GNU Affero General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -41,7 +41,7 @@ typedef unsigned long GNUNET_uLong;
 #define Z_NULL  0
 
 
-#define POLYNOMIAL (GNUNET_uLong)0xedb88320
+#define POLYNOMIAL (GNUNET_uLong) 0xedb88320
 static GNUNET_uLong crc_table[256];
 
 /*
@@ -67,6 +67,7 @@ crc_init ()
       crc_table[i + j] = crc_table[j] ^ h;
   }
 }
+
 
 /*
  * This computes the standard preset and inverted CRC, as used
@@ -124,7 +125,7 @@ GNUNET_CRYPTO_crc16_step (uint32_t sum, const void *buf, size_t len)
   for (; len >= 2; len -= 2)
     sum += *(hdr++);
   if (len == 1)
-    sum += (*hdr) & ntohs(0xFF00);
+    sum += (*hdr) & ntohs (0xFF00);
   return sum;
 }
 

@@ -80,8 +80,8 @@ static struct Interface *gifc;
  */
 static void
 forward_to (struct Interface *dst,
-	    const void *frame,
-	    size_t frame_size)
+            const void *frame,
+            size_t frame_size)
 {
   char iob[frame_size + sizeof (struct GLAB_MessageHeader)];
   struct GLAB_MessageHeader hdr;
@@ -89,14 +89,14 @@ forward_to (struct Interface *dst,
   hdr.size = htons (sizeof (iob));
   hdr.type = htons (dst->ifc_num);
   memcpy (iob,
-	  &hdr,
-	  sizeof (hdr));
+          &hdr,
+          sizeof (hdr));
   memcpy (&iob[sizeof (hdr)],
-	  frame,
-	  frame_size);
+          frame,
+          frame_size);
   write_all (STDOUT_FILENO,
-	     iob,
-	     sizeof (iob));
+             iob,
+             sizeof (iob));
 }
 
 
@@ -109,20 +109,20 @@ forward_to (struct Interface *dst,
  */
 static void
 parse_frame (struct Interface *ifc,
-	     const void *frame,
-	     size_t frame_size)
+             const void *frame,
+             size_t frame_size)
 {
   struct EthernetHeader eh;
 
   if (frame_size < sizeof (eh))
   {
     fprintf (stderr,
-	     "Malformed frame\n");
+             "Malformed frame\n");
     return;
   }
   memcpy (&eh,
-	  frame,
-	  sizeof (eh));
+          frame,
+          sizeof (eh));
   /* do work here! */
 }
 
@@ -136,14 +136,14 @@ parse_frame (struct Interface *ifc,
  */
 static void
 handle_frame (uint16_t interface,
-	      const void *frame,
-	      size_t frame_size)
+              const void *frame,
+              size_t frame_size)
 {
   if (interface > num_ifc)
     abort ();
   parse_frame (&gifc[interface - 1],
-	       frame,
-	       frame_size);
+               frame,
+               frame_size);
 }
 
 
@@ -155,11 +155,11 @@ handle_frame (uint16_t interface,
  */
 static void
 handle_control (char *cmd,
-		size_t cmd_len)
+                size_t cmd_len)
 {
   cmd[cmd_len - 1] = '\0';
   print ("Received command `%s' (ignored)\n",
-	 cmd);
+         cmd);
 }
 
 
@@ -171,7 +171,7 @@ handle_control (char *cmd,
  */
 static void
 handle_mac (uint16_t ifc_num,
-	    const struct MacAddress *mac)
+            const struct MacAddress *mac)
 {
   if (ifc_num > num_ifc)
     abort ();
@@ -196,12 +196,12 @@ main (int argc,
   struct Interface ifc[argc - 1];
 
   memset (ifc,
-	  0,
-	  sizeof (ifc));
+          0,
+          sizeof (ifc));
   num_ifc = argc - 1;
   gifc = ifc;
-  for (unsigned int i=1;i<argc;i++)
-    ifc[i-1].ifc_num = i;
+  for (unsigned int i = 1; i<argc; i++)
+    ifc[i - 1].ifc_num = i;
 
   loop ();
   return 0;

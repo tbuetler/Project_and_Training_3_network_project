@@ -41,55 +41,58 @@ loop ()
   while (-1 != (ret = read (STDIN_FILENO,
                             &buf[off],
                             sizeof (buf) - off)))
+  {
+    struct GLAB_MessageHeader hdr;
+    uint16_t size;
+
+    if (0 >= ret)
+      break;
+    off += ret;
+    while (off > sizeof (struct GLAB_MessageHeader))
     {
-      struct GLAB_MessageHeader hdr;
-      uint16_t size;
+      memcpy (&hdr,
+              buf,
+              sizeof (hdr));
+      size = ntohs (hdr.size);
+      if (off < size)
+        break;
+      if (size < sizeof (struct GLAB_MessageHeader))
+        abort ();
+      switch (ntohs (hdr.type))
+      {
+      case 0: /* control */
+        if (0 == have_mac)
+        {
+          for (unsigned int i = 0; i<(size - sizeof (hdr)) / sizeof (struct
+                                                                     MacAddress);
+               i++)
+          {
+            struct MacAddress mac;
 
-      if (0 >= ret)
-	break;
-      off += ret;
-      while (off > sizeof (struct GLAB_MessageHeader))
-	{
-	  memcpy (&hdr,
-		  buf,
-		  sizeof (hdr));
-	  size = ntohs (hdr.size);
-	  if (off < size)
-	    break;
-          if (size < sizeof (struct GLAB_MessageHeader))
-            abort ();
-	  switch (ntohs (hdr.type)) {
-	  case 0: /* control */
-	    if (0 == have_mac)
-	      {
-		for (unsigned int i=0;i<(size - sizeof (hdr)) / sizeof (struct MacAddress);i++)
-		  {
-		    struct MacAddress mac;
-
-		    memcpy (&mac,
-			    &buf[sizeof (hdr) + i * sizeof (struct MacAddress)],
-			    sizeof (struct MacAddress));
-		    handle_mac (i + 1,
-				&mac);
-		  }
-		have_mac = 1;
-	      }
-	    else
-	      {
-		handle_control (&buf[sizeof (hdr)],
-				size - sizeof (hdr));
-	      }
-	    break;
-	  default:
-	    handle_frame (ntohs (hdr.type),
-			  (const void *) &buf[sizeof (hdr)],
-			  size - sizeof (hdr));
-	    break;
-	  }
-	  memmove (buf,
-		   &buf[size],
-		   off - size);
-	  off -= size;
-	}
+            memcpy (&mac,
+                    &buf[sizeof (hdr) + i * sizeof (struct MacAddress)],
+                    sizeof (struct MacAddress));
+            handle_mac (i + 1,
+                        &mac);
+          }
+          have_mac = 1;
+        }
+        else
+        {
+          handle_control (&buf[sizeof (hdr)],
+                          size - sizeof (hdr));
+        }
+        break;
+      default:
+        handle_frame (ntohs (hdr.type),
+                      (const void *) &buf[sizeof (hdr)],
+                      size - sizeof (hdr));
+        break;
+      }
+      memmove (buf,
+               &buf[size],
+               off - size);
+      off -= size;
     }
+  }
 }

@@ -34,10 +34,10 @@
  */
 static void
 handle_frame (uint16_t interface,
-	      const void *frame,
-	      size_t frame_size)
+              const void *frame,
+              size_t frame_size)
 {
-	/* fill me in! */
+  /* fill me in! */
 }
 
 
@@ -49,25 +49,25 @@ handle_frame (uint16_t interface,
  */
 static void
 handle_control (char *cmd,
-		size_t cmd_len)
+                size_t cmd_len)
 {
   cmd[cmd_len - 1] = '\0';
   print ("Received command `%s'\n",
-	 cmd);
+         cmd);
 }
 
 
 /**
- * Handle MAC information @a mac 
+ * Handle MAC information @a mac
  *
  * @param ifc_num number of the interface with @a mac
  * @param mac the MAC address at @a ifc_num
  */
 static void
 handle_mac (uint16_t ifc_num,
-	    const struct MacAddress *mac)
+            const struct MacAddress *mac)
 {
-	/* Fill me in! */
+  /* Fill me in! */
 }
 
 

@@ -39,10 +39,12 @@ static int
 test_bc0 (const char *prog)
 {
   char my_frame[1400];
-  int send_frame () {
+  int
+  send_frame ()
+  {
     tsend (1,
-	   my_frame,
-	   sizeof (my_frame));
+           my_frame,
+           sizeof (my_frame));
     return 0;
   };
 
@@ -57,11 +59,11 @@ test_bc0 (const char *prog)
     { NULL }
   };
 
-  for (unsigned int i=0;i<sizeof (my_frame);i++)
+  for (unsigned int i = 0; i<sizeof (my_frame); i++)
     my_frame[i] = random (); /* completely randomize frame */
   return meta (cmd,
-	       (sizeof (argv) / sizeof (char *)) - 1,
-	       argv);
+               (sizeof (argv) / sizeof (char *)) - 1,
+               argv);
 }
 
 
@@ -76,21 +78,25 @@ static int
 test_bc1 (const char *prog)
 {
   char my_frame[1400];
-  int send_frame () {
+  int
+  send_frame ()
+  {
     tsend (1,
-	   my_frame,
-	   sizeof (my_frame));
+           my_frame,
+           sizeof (my_frame));
     return 0;
   };
-  int expect_broadcast () {
+  int
+  expect_broadcast ()
+  {
     uint64_t ifcs = (1 << 1) | (1 << 2); /* eth1 and eth2 */
 
     return trecv (1, /* expect *two* replies */
-		  &expect_multicast,
-		  &ifcs,
-		  my_frame,
-		  sizeof (my_frame),
-		  UINT16_MAX /* ignored */);
+                  &expect_multicast,
+                  &ifcs,
+                  my_frame,
+                  sizeof (my_frame),
+                  UINT16_MAX /* ignored */);
   };
 
   char *argv[] = {
@@ -107,11 +113,11 @@ test_bc1 (const char *prog)
     { NULL }
   };
 
-  for (unsigned int i=0;i<sizeof (my_frame);i++)
+  for (unsigned int i = 0; i<sizeof (my_frame); i++)
     my_frame[i] = random (); /* completely randomize frame */
   return meta (cmd,
-	       (sizeof (argv) / sizeof (char *)) - 1,
-	       argv);
+               (sizeof (argv) / sizeof (char *)) - 1,
+               argv);
 }
 
 
@@ -128,22 +134,26 @@ test_bc123 (const char *prog)
   char my_frame[1400];
   unsigned int src = 1;
   uint64_t ifcs = 0;
-  int send_frame () {
+  int
+  send_frame ()
+  {
     tsend (src,
-	   my_frame,
-	   sizeof (my_frame));
+           my_frame,
+           sizeof (my_frame));
     ifcs = (1 << 0) | (1 << 1) | (1 << 2); /* eth0-eth2 */
     ifcs -= (1 << (src - 1));
     src++;
     return 0;
   };
-  int expect_broadcast () {
+  int
+  expect_broadcast ()
+  {
     return trecv (1, /* expect *two* replies */
-		  &expect_multicast,
-		  &ifcs,
-		  my_frame,
-		  sizeof (my_frame),
-		  UINT16_MAX /* ignored */);
+                  &expect_multicast,
+                  &ifcs,
+                  my_frame,
+                  sizeof (my_frame),
+                  UINT16_MAX /* ignored */);
   };
 
   char *argv[] = {
@@ -164,11 +174,11 @@ test_bc123 (const char *prog)
     { NULL }
   };
 
-  for (unsigned int i=0;i<sizeof (my_frame);i++)
+  for (unsigned int i = 0; i<sizeof (my_frame); i++)
     my_frame[i] = random (); /* completely randomize frame */
   return meta (cmd,
-	       (sizeof (argv) / sizeof (char *)) - 1,
-	       argv);
+               (sizeof (argv) / sizeof (char *)) - 1,
+               argv);
 }
 
 
@@ -182,21 +192,25 @@ static int
 test_bc_large (const char *prog)
 {
   char my_frame[14000];
-  int send_frame () {
+  int
+  send_frame ()
+  {
     tsend (1,
-	   my_frame,
-	   sizeof (my_frame));
+           my_frame,
+           sizeof (my_frame));
     return 0;
   };
-  int expect_broadcast () {
+  int
+  expect_broadcast ()
+  {
     uint64_t ifcs = (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4); /* eth1-eth4 */
 
     return trecv (3, /* expect *four* replies */
-		  &expect_multicast,
-		  &ifcs,
-		  my_frame,
-		  sizeof (my_frame),
-		  UINT16_MAX /* ignored */);
+                  &expect_multicast,
+                  &ifcs,
+                  my_frame,
+                  sizeof (my_frame),
+                  UINT16_MAX /* ignored */);
   };
 
   char *argv[] = {
@@ -215,11 +229,11 @@ test_bc_large (const char *prog)
     { NULL }
   };
 
-  for (unsigned int i=0;i<sizeof (my_frame);i++)
+  for (unsigned int i = 0; i<sizeof (my_frame); i++)
     my_frame[i] = random (); /* completely randomize frame */
   return meta (cmd,
-	       (sizeof (argv) / sizeof (char *)) - 1,
-	       argv);
+               (sizeof (argv) / sizeof (char *)) - 1,
+               argv);
 }
 
 
@@ -232,7 +246,8 @@ main (int argc,
 {
   unsigned int grade = 0;
   unsigned int possible = 0;
-  struct Test {
+  struct Test
+  {
     const char *name;
     int (*fun)(const char *arg);
   } tests[] = {
@@ -244,24 +259,24 @@ main (int argc,
   };
 
   if (argc != 2)
-    {
-      fprintf (stderr,
-	       "Call with HUB program to test as 1st argument!\n");
-      return 1;
-    }
-  for (unsigned int i=0; NULL != tests[i].fun; i++)
-    {
-      if (0 == tests[i].fun (argv[1]))
-	grade++;
-      else
-	fprintf (stdout,
-		 "Failed test `%s'\n",
-		 tests[i].name);
-      possible++;
-    }
+  {
+    fprintf (stderr,
+             "Call with HUB program to test as 1st argument!\n");
+    return 1;
+  }
+  for (unsigned int i = 0; NULL != tests[i].fun; i++)
+  {
+    if (0 == tests[i].fun (argv[1]))
+      grade++;
+    else
+      fprintf (stdout,
+               "Failed test `%s'\n",
+               tests[i].name);
+    possible++;
+  }
   fprintf (stdout,
-	   "Final grade: %u/%u\n",
-	   grade,
-	   possible);
+           "Final grade: %u/%u\n",
+           grade,
+           possible);
   return 0;
 }

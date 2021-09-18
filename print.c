@@ -33,31 +33,31 @@
  */
 static void
 write_all (int fd,
-	   const void *buf,
-	   size_t buf_size)
+           const void *buf,
+           size_t buf_size)
 {
   const char *cbuf = buf;
   size_t off;
 
   off = 0;
   while (off < buf_size)
-    {
-      ssize_t ret;
+  {
+    ssize_t ret;
 
-      ret = write (fd,
-		   &cbuf[off],
-		   buf_size - off);
-      if (ret <= 0)
-	{
-	  fprintf (stderr,
-		   "Writing %u bytes to %d failed: %s\n",
-		   (unsigned int) (buf_size - off),
-		   fd,
-		   strerror (errno));
-	  exit (1);
-	}
-      off += ret;
+    ret = write (fd,
+                 &cbuf[off],
+                 buf_size - off);
+    if (ret <= 0)
+    {
+      fprintf (stderr,
+               "Writing %u bytes to %d failed: %s\n",
+               (unsigned int) (buf_size - off),
+               fd,
+               strerror (errno));
+      exit (1);
     }
+    off += ret;
+  }
 }
 
 
@@ -86,10 +86,10 @@ print (const char *fmt,
   va_list ap;
 
   va_start (ap,
-	    fmt);
+            fmt);
   vasprintf (&str,
-	     fmt,
-	     ap);
+             fmt,
+             ap);
   va_end (ap);
   {
     size_t slen = strlen (str);
@@ -100,14 +100,14 @@ print (const char *fmt,
     char buf[sizeof (hdr) + slen];
 
     memcpy (buf,
-	    &hdr,
-	    sizeof (hdr));
+            &hdr,
+            sizeof (hdr));
     memcpy (&buf[sizeof(hdr)],
-	    str,
-	    slen);
+            str,
+            slen);
     write_all (STDOUT_FILENO,
-	       buf,
-	       sizeof (buf));
+               buf,
+               sizeof (buf));
   }
   free (str);
 }

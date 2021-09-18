@@ -1,5 +1,8 @@
+all = instructions programs tests
 instructions = nprj0.pdf nprj1.pdf nprj2.pdf nprj3.pdf faq.pdf
 programs = parser hub switch vswitch arp router
+tests = test-hub
+
 CFLAGS = -O0 -g # -Wall
 
 all: network-driver $(instructions) $(programs)
@@ -35,4 +38,4 @@ check-router: test-router
 	./test-router ./router
 
 
-.PHONY: clean check check-switch check-arp check-router
+.PHONY: clean check check-hub check-switch check-arp check-router

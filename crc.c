@@ -25,9 +25,11 @@
  * @brief implementation of CRC8, CRC16 and CRC32
  * @author Christian Grothoff
  */
-
+#include <stdlib.h>
 #include <stdint.h>
 #include <limits.h>
+#include <arpa/inet.h>
+#include <string.h>
 
 /* Avoid wasting space on 8-byte longs. */
 #if UINT_MAX >= 0xffffffff

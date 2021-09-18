@@ -21,7 +21,9 @@
  * @brief Helper functions for printing and communication with the parent
  * @author Christian Grothoff
  */
-
+#include "glab.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 /**
  * Helper function to deal with partial writes.
@@ -31,7 +33,7 @@
  * @param buf what to write
  * @param buf_size number of bytes in @a buf
  */
-static void
+void
 write_all (int fd,
            const void *buf,
            size_t buf_size)
@@ -67,18 +69,7 @@ write_all (int fd,
  * @param fmt format string
  * @param ... arguments for @a fmt
  */
-static void
-print (const char *fmt,
-       ...)  __attribute__ ((format (gnu_printf, 1, 2)));
-
-
-/**
- * Print message to the user by sending to parent.
- *
- * @param fmt format string
- * @param ... arguments for @a fmt
- */
-static void
+void
 print (const char *fmt,
        ...)
 {

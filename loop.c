@@ -21,15 +21,19 @@
  * @brief Sample implementation of the main loop for interacting with the parent
  * @author Christian Grothoff
  */
-
+#include "glab.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 /**
  * Sample main loop.  Reads packets from STDIN_FILENO
  * and calls handle_mac(), handle_control() or handle_frame()
  * on each depending on the type.
  */
-static void
-loop ()
+void
+loop (FrameHandler fh,
+      ControlHandler ch,
+      MacHandler mh)
 {
   char buf[UINT16_MAX];
   size_t off;
@@ -72,21 +76,21 @@ loop ()
             memcpy (&mac,
                     &buf[sizeof (hdr) + i * sizeof (struct MacAddress)],
                     sizeof (struct MacAddress));
-            handle_mac (i + 1,
-                        &mac);
+            mh (i + 1,
+                &mac);
           }
           have_mac = 1;
         }
         else
         {
-          handle_control (&buf[sizeof (hdr)],
-                          size - sizeof (hdr));
+          ch (&buf[sizeof (hdr)],
+              size - sizeof (hdr));
         }
         break;
       default:
-        handle_frame (ntohs (hdr.type),
-                      (const void *) &buf[sizeof (hdr)],
-                      size - sizeof (hdr));
+        fh (ntohs (hdr.type),
+            (const void *) &buf[sizeof (hdr)],
+            size - sizeof (hdr));
         break;
       }
       memmove (buf,

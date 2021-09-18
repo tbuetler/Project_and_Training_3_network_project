@@ -70,9 +70,6 @@ static unsigned int num_ifc;
 static struct Interface *gifc;
 
 
-#include "print.c"
-
-
 /**
  * Forward @a frame to interface @a dst.
  *
@@ -163,8 +160,6 @@ handle_mac (uint16_t ifc_num,
 }
 
 
-#include "loop.c"
-
 int
 main (int argc,
       char **argv)
@@ -179,6 +174,8 @@ main (int argc,
   for (unsigned int i = 1; i<argc; i++)
     ifc[i - 1].ifc_num = i;
 
-  loop ();
+  loop (&handle_frame,
+        &handle_control,
+        &handle_mac);
   return 0;
 }

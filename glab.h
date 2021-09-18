@@ -95,4 +95,82 @@ struct MacAddress
 _Pragma("pack(pop)")
 
 
+/**
+ * Process frame received from @a interface.
+ *
+ * @param interface number of the interface on which we received @a frame
+ * @param frame the frame
+ * @param frame_size number of bytes in @a frame
+ */
+typedef void
+(*FrameHandler)(uint16_t interface,
+                const void *frame,
+                size_t frame_size);
+
+/**
+ * Handle control message @a cmd.
+ *
+ * @param cmd text the user entered
+ * @param cmd_len length of @a cmd
+ */
+typedef void
+(*ControlHandler)(char *cmd,
+                  size_t cmd_len);
+
+/**
+ * Handle MAC information @a mac
+ *
+ * @param ifc_num number of the interface with @a mac
+ * @param mac the MAC address at @a ifc_num
+ */
+typedef void
+(*MacHandler)(uint16_t ifc_num,
+              const struct MacAddress *mac);
+
+
+/**
+ * Sample main loop.  Reads packets from STDIN_FILENO and calls fh(),
+ * ch() or mh() on each depending on the type.
+ */
+void
+loop (FrameHandler fh,
+      ControlHandler ch,
+      MacHandler mh);
+
+
+/**
+ * Helper function to deal with partial writes.
+ * Fails hard (calls exit() on failures)!
+ *
+ * @param fd where to write to
+ * @param buf what to write
+ * @param buf_size number of bytes in @a buf
+ */
+void
+write_all (int fd,
+           const void *buf,
+           size_t buf_size);
+
+
+/**
+ * Print message to the user by sending to parent.
+ *
+ * @param fmt format string
+ * @param ... arguments for @a fmt
+ */
+void
+print (const char *fmt,
+       ...)  __attribute__ ((format (gnu_printf, 1, 2)));
+
+/**
+ * Calculate the checksum of a buffer in one step.
+ *
+ * @param buf buffer to  calculate CRC over (must be 16-bit aligned)
+ * @param len number of bytes in hdr, must be multiple of 2
+ * @return crc16 value
+ */
+uint16_t
+GNUNET_CRYPTO_crc16_n (const void *buf, size_t len);
+
+
 #endif

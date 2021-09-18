@@ -22,7 +22,7 @@
  * @author Christian Grothoff
  */
 #include "glab.h"
-#include "print.c"
+
 
 /**
  * gcc 4.x-ism to pack structures (to be used before structs);
@@ -459,9 +459,6 @@ handle_mac (uint16_t ifc_num,
 }
 
 
-#include "loop.c"
-
-
 /**
  * Launches the arp tool.
  *
@@ -490,7 +487,9 @@ main (int argc,
                        argv[i]))
       abort ();
   }
-  loop ();
+  loop (&handle_frame,
+        &handle_control,
+        &handle_mac);
   for (unsigned int i = 1; i<argc; i++)
     free (ifc[i - 1].name);
   return 0;

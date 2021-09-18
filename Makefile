@@ -1,6 +1,6 @@
 all = instructions programs tests
 instructions = nprj0.pdf nprj1.pdf nprj2.pdf nprj3.pdf faq.pdf
-programs = parser hub switch vswitch arp router
+programs = parser hub switch arp router
 tests = test-hub
 
 CFLAGS = -O0 -g # -Wall
@@ -20,8 +20,8 @@ $(instructions): %.pdf: %.tex bonus.tex code.tex grading.tex setup.tex testing.t
 clean:
 	rm -f network-driver sample-parser $(instructions) *.log *.aux *.out $(programs)
 
-$(programs): %: %.c glab.h loop.c print.c
-	gcc $(CFLAGS) $< -o $@
+$(programs): %: %.c glab.h loop.c print.c crc.c
+	gcc $(CFLAGS) $^ -o $@
 
 test-hub: test-hub.c harness.c harness.h
 	gcc $(CFLAGS) $^ -o $@

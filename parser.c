@@ -22,7 +22,6 @@
  * @author Christian Grothoff
  */
 #include "glab.h"
-#include "print.c"
 
 
 /**
@@ -71,12 +70,12 @@ handle_mac (uint16_t ifc_num,
 }
 
 
-#include "loop.c"
-
 int
 main (int argc,
       char **argv)
 {
-  loop ();
+  loop (&handle_frame,
+        &handle_control,
+        &handle_mac);
   return 0;
 }

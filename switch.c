@@ -22,7 +22,6 @@
  * @author Christian Grothoff
  */
 #include "glab.h"
-#include "print.c"
 
 
 /**
@@ -179,9 +178,6 @@ handle_mac (uint16_t ifc_num,
 }
 
 
-#include "loop.c"
-
-
 /**
  * Launches the switch.
  *
@@ -203,6 +199,8 @@ main (int argc,
   for (unsigned int i = 1; i<argc; i++)
     ifc[i - 1].ifc_num = i;
 
-  loop ();
+  loop (&handle_frame,
+        &handle_control,
+        &handle_mac);
   return 0;
 }

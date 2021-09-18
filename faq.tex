@@ -34,7 +34,7 @@ Use something like this:
 static void
 print_mac (const struct MacAddress *mac)
 {
-  print ("%02X:%02X:%02X:%02X:%02X:%02X\n
+  print ("%02x:%02x:%02x:%02x:%02x:%02x\n
          mac->mac[0], mac->mac[1],
          mac->mac[2], mac->mac[3],
          mac->mac[4], mac->mac[5]);
@@ -142,9 +142,9 @@ handle_frame (uint16_t interface,
 \subsection{Why does my {\tt printf} not work?}
 
 {\tt printf} prints to {\tt stdout}, which in your setup is the
-network-driver which expects to receive frames to be transmitted.
+{\tt network-driver} which expects to receive frames to be transmitted.
 To output to the console, you need to give a special command to
-the network-driver.  This is provided by the {\tt print()} function,
+the {\tt network-driver}.  This is provided by the {\tt print()} function,
 which thus replaces {\tt printf} for your project.  You can
 also directly use {\tt fprintf (stderr, ...)} to write to {\tt stderr}
 for logging. Note that required output to the user (for grading) must
@@ -281,21 +281,7 @@ the {\tt hub}.  {\tt switch} and {\tt vswitch} programs.
   \label{fig:setup}
 \end{figure}
 
-\subsection{My (new) code does not seem to work at all. I've been ignoring the {\em clock skew} warning from {\tt make}. What is going on?}
-
-The PI does not have a real-time clock. Thus, after a reboot, it can
-find itself in the past. Your latest edits receive time stamps that
-pre-date the binaries it created in the past before its time travels.
-Make builds programs using timestamps. Thus, {\tt make} did NOT rebuild
-your code, but it figured something might be fishy because your binaries
-are from the future. As your binary is your old binary, your new features
-do not work at all.
-
-{\bf Solution:} If you ever get a {\em clock skew} warning, run {\tt
-  make clean} to delete all old binaries.
-
-
-\subsection{My notebook cannot ping the desktop}
+\subsection{My notebook cannot ping the system running the switch/router}
 
 This is normal, as your switch/router logic does not forward the
 traffic to the desktop's host operating system.  Your notebooks can
@@ -374,12 +360,13 @@ the Ethernet header is also excluded (layer 3!).
 Note that the MTU command-line argument (!) for the {\tt router} {\em
   excludes} the Ethernet header, but {\bf internally} the \texttt{mtu}
 member of the {\tt struct Interface} {em includes} the Ethernet header
-(see check in {\tt forward\_to}).  So you must subtract the size of
-the Ethernet header when generating the ICMP message!
+(see logic in {\tt parse\_cmd\_arg} and check in {\tt forward\_to}).
+
+You must subtract the size of the Ethernet header when generating the
+ICMP message!
 
 
 \end{document}
-
 % Legacy issues, should be resolved.
 
 \subsection{I can't compile the ''network-driver'' on a (lab) PC}

@@ -1,17 +1,5 @@
 \documentclass{article}
-\usepackage{amsmath}
-\usepackage{tikz}
-\usetikzlibrary{positioning,calc,decorations.pathreplacing,shapes,fit}
-\usepackage{colortbl}
-\usepackage{booktabs}
 \usepackage{url}
-\usepackage{pifont}
-\newcommand{\cmark}{\ding{51}}%
-\newcommand{\xmark}{\ding{55}}%
-\usepackage{array, adjustbox,url}
-\usepackage{pifont,marvosym} % wasysym
-\usepackage{rotating,subfig}
-\usepackage{xspace}
 
 \title{BTI 3021: Networking Project - Sprint 2}
 
@@ -41,7 +29,8 @@ The basic setup is the same as in the first sprint.
 
 \subsection{Deliverables}
 
-There will be four main deliverables for the sprint:
+There will be two main deliverables for the sprint:
+
 \begin{description}
 \item[Implementation] You must {\bf implement the ARP protocol}. Your
   implementation must answer to ARP requests, and also itself
@@ -51,13 +40,11 @@ There will be four main deliverables for the sprint:
 \item[Testing] You must implement and submit your own {\bf test cases}
   by {\em pretending} to be the network driver (see below) and sending
   ARP requests or command-line inputs to your program and verifying that it
-  outputs the correct frames. Additionally, you should perform and
-  {\bf document} {\em interoperability} tests against existing
+  outputs the correct frames. Additionally, you should perform
+  {\em interoperability} tests against existing
   implementations (i.e. other notebooks from your team to ensure that
   your ARP protocol implementation integrates correctly with other
   implementations).
-\item[Design and documentation] You must design the main
-  data structure (ARP table), and create a {\bf comprehensive test plan}.
 \end{description}
 
 All deliverables must be submitted to Git (master branch)
@@ -67,19 +54,12 @@ by the submission deadline announced on Moodle.
 
 The goal is to implement a program {\tt arp} that:
 \begin{enumerate}
-\item Watches for ARP queries on the Ethernet link
-\item Responds with ARP responses for your own IP address
+\item Watches for ARP queries on the Ethernet link and responds with ARP responses
+  if queries are seen for your own IP address(es)
 \item Provides an ARP cache so that it does not have to repeatedly
   make ARP requests to the network for MAC addresses it already knows.
-\item If the user just enteres ``arp'' without
-  an IP address, you should output the ARP table in the format
-  ``{\em IP} -$>$ {\em MAC} ({\em IFNAME})'' with one entry per line,
-  i.e.
-\begin{verbatim}
-10.54.25.15 -> 28:c6:3f:1a:0a:bf (eth1)
-\end{verbatim}
-  (note the leading ``0'' digit in {\tt 0a}).
-\item Reads IPv4 addresses from {\tt stdin} (in human-readable format).
+\item Allows the user to trigger ARP requests via the console
+  by reading ``arp`` commands with IPv4 addresses from {\tt stdin} (in human-readable format).
   The interactive command syntax should be
   ``arp {\em IP-ADDR} {\em IFNAME}'' (i.e. each line is to be prefixed with
   the letters ``arp '', followed by the IPv4 address and the name of
@@ -88,20 +68,30 @@ The goal is to implement a program {\tt arp} that:
   \item
   If the {\tt IP-ADDR} is in the ARP cache, the program must immediately
   output the associated {\em MAC}:
-  \begin{verbatim}
+\begin{verbatim}
 28:c6:3f:1a:0a:bf
 \end{verbatim}
-  {\bf NOTE: the format requirement was clarified recently.}
   \item
   If the {\tt IP-ADDR} is {\bf not} in the ARP cache, the program should {\em only}
   issue the ARP query for those IPv4 addresses.
   \end{enumerate}
-\item If an ARP response is received (at any time), the ARP cache must be
-  updated accordingly (but the MAC address does not need to be output at
+\item If an ARP request for one of your IP addresses
+  or an ARP response destined for your system (IP and MAC)
+  is received (at any time), the ARP cache must be
+  updated accordingly. However, the MAC address MUST NOT be output at
   that time, even if there was an explicit command-line request for this
-  address before).
+  address before.
+\item If the user just enteres ``arp'' without
+  an IP address, you should output the ARP table in the format
+  ``{\em IP} -$>$ {\em MAC} ({\em IFNAME})'' with one entry per line,
+  i.e.
+\begin{verbatim}
+10.54.25.15 -> 28:c6:3f:1a:0a:bf (eth1)
+\end{verbatim}
+  (note the leading ``0'' digit in {\tt 0a}).
 \end{enumerate}
-Your programm should be called with the name of the interface, the IP
+
+Your programm should be invoked with the name of the interface, the IP
 address\footnote{You may support multiple IPs per network interface,
   using a comma-separated list of IPs and network masks, but this is
   not required.} for that interface and the network mask.  Example:
@@ -129,25 +119,22 @@ You get points for each of the key deliverables:
 \begin{center}
 \begin{tabular}{l|r}
 Correct implementation                    & 10 \\ \hline
-Comprehensive test cases                  &  6 \\ \hline \hline
-Total                                     & 16
+Comprehensive test cases                  &  4 \\ \hline \hline
+Total                                     & 14
 \end{tabular}
 \end{center}
 
 
 \subsubsection{Correct implementation}
 \begin{itemize}
-\item 3 points for passing public test cases
-\item 5 points for passing secret test cases (see Section~\ref{sec:binaries})
+  \item 10 points for passing test cases
 \end{itemize}
 
 \subsubsection{Comprehensive test cases}
 \begin{itemize}
 \item 0 points if public reference implementation (see Section~\ref{sec:binaries})
       fails test cases, {\bf otherwise}
-\item 1 points for failing public buggy implementation (see Section~\ref{sec:binaries}),
-       plus
-\item 2 points for finding bugs in secret buggy implementation(s)
+\item 4 points for failing buggy implementations (see Section~\ref{sec:binaries})
 \end{itemize}
 
 \input{bonus.tex}
@@ -167,10 +154,11 @@ can initiate ARP requests from the command line and cache the answers.
 
 You are provided with several binaries:
 \begin{description}
-\item[public-test-arp] A public test case, run using ``./public-test-arp ./arp''
-  to test your switch. Returns 0 on success.
-\item[public-arp] Reference implementation of the ``arp''.
-\item[public-bug-arp] Buggy implementation of a ``arp``.
+\item[reference-test-arp] A public test case, run using ``./reference-test-arp ./arp''
+  to test your ARP implementation. Returns 0 on success.
+\item[reference-arp] Reference implementation of the ``arp''.
+\item[bug1-arp] Buggy implementation of a ``arp``.
+\item[bug2-arp] Buggy implementation of a ``arp``.
 \end{description}
 
 
@@ -190,15 +178,16 @@ have the following {\tt make} targets:
 For grading, we will basically run commands like:
 \begin{verbatim}
 GRADE=0
-$ make test-arp
-$ cp public-bug-arp arp
-$ make check-arp || GRADE=`expr $GRADE + 1`
-$ cp private-bug-arp arp
-$ make check-arp || GRADE=`expr $GRADE + 2`
-$ cp public-arp arp
-$ make check-arp || GRADE=0
+make test-arp
+cp bug1-arp arp
+make check-arp || GRADE=`expr $GRADE + 2`
+cp bug2-arp arp
+make check-arp || GRADE=`expr $GRADE + 2`
+cp reference-arp arp
+make check-arp || GRADE=0
 echo "Test grade: $GRADE"
 \end{verbatim}
+
 You must thus make sure the build system continues to create programs in the
 right (top-level) location!
 

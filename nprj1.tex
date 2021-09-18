@@ -1,17 +1,5 @@
 \documentclass{article}
-\usepackage{amsmath}
-\usepackage{tikz}
-\usetikzlibrary{positioning,calc,decorations.pathreplacing,shapes,fit}
-\usepackage{colortbl}
-\usepackage{booktabs}
 \usepackage{url}
-\usepackage{pifont}
-\newcommand{\cmark}{\ding{51}}%
-\newcommand{\xmark}{\ding{55}}%
-\usepackage{array, adjustbox,url}
-\usepackage{pifont,marvosym} % wasysym
-\usepackage{rotating,subfig}
-\usepackage{xspace}
 
 \title{BTI 3021: Networking Project - Sprint 1}
 
@@ -39,7 +27,8 @@ specifications on the Internet.
 
 \subsection{Deliverables}
 
-There will be three main deliverables for the sprint:
+There will be two main deliverables for the sprint:
+
 \begin{description}
 \item[Implementation] You must {\bf implement the switching
   algorithm}, extending the {\tt switch.c} template provided
@@ -47,8 +36,8 @@ There will be three main deliverables for the sprint:
 \item[Testing] You must implement and submit your own {\bf test cases}
   by {\em pretending} to be the network driver (see below) and sending
   various Ethernet frames to your program and verifying that it
-  outputs the correct frames. Additionally, you should perform and
-  {\bf document} {\em interoperability} tests against existing
+  outputs the correct frames. Additionally, you should perform
+  {\em interoperability} tests against existing
   implementations (i.e. other notebooks from your team to ensure that
   your switch integrates correctly with other implementations).
 \end{description}
@@ -74,8 +63,8 @@ For the {\bf switch} sprint, you get points for each of the key deliverables:
 \begin{center}
 \begin{tabular}{l|r}
 Correct implementation                    &  8 \\ \hline
-Comprehensive test cases                  &  4 \\ \hline \hline
-Total                                     & 12
+Comprehensive test cases                  &  6 \\ \hline \hline
+Total                                     & 14
 \end{tabular}
 \end{center}
 
@@ -88,7 +77,7 @@ Total                                     & 12
 \begin{itemize}
 \item 0 points if public reference implementation (see Section~\ref{sec:binaries})
       fails test cases, {\bf otherwise}
-\item 4 points for failing public buggy implementations (see Section~\ref{sec:binaries})
+\item 6 points for failing buggy implementations (see Section~\ref{sec:binaries})
 \end{itemize}
 
 \input{bonus.tex}
@@ -110,10 +99,12 @@ and optimizes subsequent traffic.
 You are provided with several binaries:
 
 \begin{description}
-\item[public-test-switch] A public test case, run using ``./public-test-switch ./switch''
+\item[reference-test-switch] A public test case, run using ``./reference-test-switch ./switch''
   to test your switch. Returns 0 on success.
-\item[public-switch] Reference implementation of the ``switch''.
-\item[public-bug-switch] Buggy implementation of a ``switch''.
+\item[reference-switch] Reference implementation of the ``switch''.
+\item[bug1-switch] Buggy implementation of a ``switch''.
+\item[bug2-switch] Buggy implementation of a ``switch''.
+\item[bug3-switch] Buggy implementation of a ``switch''.
 \end{description}
 
 
@@ -130,111 +121,22 @@ have the following {\tt make} targets:
 \item[check-switch] Run ``test-switch`` against the ``switch'' binary.
 \end{description}
 
-
 For grading, we will basically run commands like:
 \begin{verbatim}
 GRADE=0
-$ make test-switch
-$ cp public-bug-switch switch
-$ make check-switch || GRADE=`expr $GRADE + 2`
-$ cp private-bug-switch switch
-$ make check-switch || GRADE=`expr $GRADE + 2`
-$ cp public-switch switch
-$ make check-switch || GRADE=0
+make test-switch
+cp bug1-switch switch
+make check-switch || GRADE=`expr $GRADE + 2`
+cp bug2-switch switch
+make check-switch || GRADE=`expr $GRADE + 2`
+cp bug3-switch switch
+make check-switch || GRADE=`expr $GRADE + 2`
+cp reference-switch switch
+make check-switch || GRADE=0
 echo "Test grade: $GRADE"
 \end{verbatim}
 
 You must thus make sure the build system continues to create programs
 in the right (top-level) location!
 
-
-
-\section{Bonus exercise}
-
-This exercise may help you better understand the material from the
-networking course. It is not expected to be achievable within the
-period of the sprint and best done as a follow-up. It is {\bf not
-  graded}.
-
-Implement {\em vswitch} which forwards frames received on any
-interface to any other interface, passively learns MAC addresses,
-and respects VLAN tags. As before, the command-line specifies the
-list of network interfaces you should switch on, but with
-additional options to specify the VLANS.  Example:
-\begin{verbatim}
-$ network-driver eth0 eth1 eth2 eth3 - \
-  vswitch eth0[T:1,2] eth1[U:1] eth2[U:2] eth3[U:2]
-\end{verbatim}
-This is supposed to run VLANs 1 and 2 tagged on {\tt eth0},
-and VLANs 1, 2 or 2 untagged on {\tt eth1}, {\tt eth2},
-or {\tt eth3} respectively.  Network interfaces specified
-without ``[]'' should operate untagged on VLAN 0.  It is
-not allowed to have interfaces accept both tagged and
-untagged frames.
-
-Test your implementation against the Netgear switch of the lab.
-Bridge a tagged VLAN ({\tt VID}$=3$) from the Netgear switch ({\tt
-  eth1}) with two untagged notebooks ({\tt eth2}, {\tt eth3}) using
-the BananaPi.
-
-Properties to consider for a virtual switch:
-\begin{itemize}
-\item Correct forwarding? Do frames flow bidirectionally between eth2 and eth3?
-\item Correct switching? Is learning correctly implemented?
-\item Are VLAN tags added/stripped?
-\item Are correct limitations imposed on VLANs?
-  For example using the configuration above, you might check that
-  frames with $VID=2$ are not forwarded to eth1.
-\end{itemize}
-
-
 \end{document}
-
-
-\subsection{Alternative setup with qemu}
-
-
-
-Download a basic qemu VM, for example from
-\url{https://people.debian.org/~aurel32/qemu/amd64/}.
-
-Then launch your router with four network interfaces and
-the respective up scripts and disjoint MACs:
-\begin{verbatim}
-# qemu-system-x86_64 -hda wheezy.qcov2 \
-   -device e1000,netdev=net0,mac=10:10:A0:D0:C0:B1 \
-   -netdev socket,id=net0,listen=:10001 \
-   -device e1000,netdev=net1,mac=10:10:A0:D0:C0:B2 \
-   -netdev socket,id=net0,listen=:10002 \
-   -device e1000,netdev=net2,mac=10:10:A0:D0:C0:B3 \
-   -netdev socket,id=net0,listen=:10003 \
-   -device e1000,netdev=net3,mac=10:10:A0:D0:C0:B4 \
-   -netdev socket,id=net0,listen=:10004
-\end{verbatim}
-Then, launch additional VMs to connect ``other'' systems
-to your router:
-\begin{verbatim}
-# cp wheezy.qcov2 wheezy0.qcov
-# qemu-system-x86_64 -hda wheezy0.qcov2 \
-   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B1 \
-   -netdev socket,id=net0,connect:10001
-# cp wheezy.qcov2 wheezy1.qcov
-# qemu-system-x86_64 -hda wheezy1.qcov2 \
-   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B2 \
-   -netdev socket,id=net0,connect:10002
-# cp wheezy.qcov2 wheezy2.qcov
-# qemu-system-x86_64 -hda wheezy2.qcov2 \
-   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B3 \
-   -netdev socket,id=net0,connect:10003
-# cp wheezy.qcov2 wheezy3.qcov
-# qemu-system-x86_64 -hda wheezy3.qcov2 \
-   -device e1000,netdev=net0,mac=10:20:A0:D0:C0:B4 \
-   -netdev socket,id=net0,connect:10004
-\end{verbatim}
-You may want to link up your VMs to your host to copy files:
-\begin{verbatim}
-# qemu-system-x86_64 ...
-  -net nic -net user,hostfwd=tcp::5555-:22
-\end{verbatim}
-Now your localhost port 5555 is forwarded to port 22 of the
-virtual machine.

@@ -1,17 +1,5 @@
 \documentclass{article}
-\usepackage{amsmath}
-\usepackage{tikz}
-\usetikzlibrary{positioning,calc,decorations.pathreplacing,shapes,fit}
-\usepackage{colortbl}
-\usepackage{booktabs}
 \usepackage{url}
-\usepackage{pifont}
-\newcommand{\cmark}{\ding{51}}%
-\newcommand{\xmark}{\ding{55}}%
-\usepackage{array, adjustbox,url}
-\usepackage{pifont,marvosym} % wasysym
-\usepackage{rotating,subfig}
-\usepackage{xspace}
 
 \title{BTI 3021: Networking Project - Sprint 3}
 
@@ -24,7 +12,8 @@
 \section{Introduction}
 
 For this sprint you will write an IP router, building upon the
-results from your sprint.
+results from your previous sprint (ARP). You will most likely
+want to copy large parts of your ARP code into the router logic.
 
 While the driver and skeleton you are given is written in C, you may
 again use {\em any} language of your choice for the implementation (as
@@ -40,7 +29,8 @@ The basic setup is the same as in the first two sprints.
 
 \subsection{Deliverables}
 
-There will be three main deliverables for the sprint:
+There will be two main deliverables for the sprint:
+
 \begin{description}
 \item[Implementation] You must implement an IPv4 router. Your
   implementation must answer to IP packets, and route them.
@@ -49,8 +39,8 @@ There will be three main deliverables for the sprint:
 \item[Testing] You must implement and submit your own {\bf test cases}
   by {\em pretending} to be the network driver (see below) and sending
   IP packets or command-line inputs to your program and verifying that it
-  outputs the correct frames. Additionally, you should perform and
-  {\bf document} {\em interoperability} tests against existing
+  outputs the correct frames. Additionally, you should perform
+  {\em interoperability} tests against existing
   implementations (i.e. other notebooks from your team to ensure that
   your IP router implementation integrates correctly with other
   implementations).
@@ -133,17 +123,14 @@ Total                                     & 22
 
 \subsubsection{Correct implementation}
 \begin{itemize}
-\item 3 points for passing public test cases
-\item 7 points for passing secret test cases (see Section~\ref{sec:binaries})
+\item 14 points for passing test cases
 \end{itemize}
 
 \subsubsection{Comprehensive test cases}
 \begin{itemize}
 \item 0 points if public reference implementation (see Section~\ref{sec:binaries})
       fails test cases, {\bf otherwise}
-\item 2 points for failing public buggy implementation (see Section~\ref{sec:binaries}),
-       plus
-\item 2 points for finding bugs in secret buggy implementation(s)
+\item 8 points for failing buggy implementations (see Section~\ref{sec:binaries})
 \end{itemize}
 
 \input{bonus.tex}
@@ -159,11 +146,15 @@ should implement a program {\tt router} which implements an IPv4 router.
 \section{Provided binaries} \label{sec:binaries}
 
 You are provided with several binaries:
+
 \begin{description}
-\item[public-test-router] A public test case, run using ``./public-test-router ./router''
+\item[reference-test-router] A public test case, run using ``./reference-test-router ./router''
   to test your router. Returns 0 on success.
-\item[public-router] Reference implementation of the ``router''.
-\item[public-bug-router] Buggy implementation of a ``router``.
+\item[reference-router] Reference implementation of the ``router''.
+\item[bug1-router] Buggy implementation of a ``router``.
+\item[bug2-router] Buggy implementation of a ``router``.
+\item[bug3-router] Buggy implementation of a ``router``.
+\item[bug4-router] Buggy implementation of a ``router``.
 \end{description}
 
 
@@ -183,13 +174,17 @@ have the following {\tt make} targets:
 For grading, we will basically run commands like:
 \begin{verbatim}
 GRADE=0
-$ make test-router
-$ cp public-bug-router router
-$ make check-router || GRADE=`expr $GRADE + 2`
-$ cp private-bug-router router
-$ make check-router || GRADE=`expr $GRADE + 2`
-$ cp public-router router
-$ make check-router || GRADE=0
+make test-router
+cp bug1-router router
+make check-router || GRADE=`expr $GRADE + 2`
+cp bug2-router router
+make check-router || GRADE=`expr $GRADE + 2`
+cp bug3-router router
+make check-router || GRADE=`expr $GRADE + 2`
+cp bug4-router router
+make check-router || GRADE=`expr $GRADE + 2`
+cp refernece-router router
+make check-router || GRADE=0
 echo "Test grade: $GRADE"
 \end{verbatim}
 You must thus make sure the build system continues to create programs in the

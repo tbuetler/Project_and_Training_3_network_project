@@ -1,0 +1,352 @@
+\documentclass{beamer}
+\title{Project \& Training 3: Networking Project}
+%\subtitle{SUBTITLE}
+\date{KW 47/2021}
+\author{Hans-J\"urg Wenger\footnote{Available via MS Teams} \& Christian Grothoff\footnote{Available on Mumble (gnunet.org)}}
+\institute{Berner Fachhochschule}
+
+\begin{document}
+
+\begin{frame}
+  \maketitle
+\end{frame}
+
+\begin{frame}{Agenda}
+\tableofcontents
+\end{frame}
+
+\section{Lab overview}
+\begin{frame}{Networking project}
+There are three main sprints:
+\begin{enumerate}
+\item Implement an Ethernet switch
+\item Implement the ARP protocol
+\item Implement an IPv4 router
+\end{enumerate}
+Today, we will implement a {\tt hub}, which serves as a quick warm-up.
+The {\tt switch} is {\bf not required} for students in BTI 3022.
+\end{frame}
+
+
+\section{Organization}
+\begin{frame}{Team}
+  {\bf Suggested} are teams of 4 students.
+  This is a {\em suggestion}, not a requirement!
+  If your team is smaller, the required thresholds for passing the
+  course will be reduced.
+
+  Teams have been pre-assigned, if there are problems
+  within your team, do talk to the professors who will
+  try to find a solution.
+\end{frame}
+
+
+\begin{frame}{Process}
+Three 2-week sprints:
+\begin{itemize}
+\item Plan algorithms, data structures and testing
+\item Implement
+\item Unit-test
+\item Integration test
+\item[$\Rightarrow$] Version in Git at submission time is graded!
+\end{itemize}
+\end{frame}
+
+
+\section{Hardware}
+
+\begin{frame}[fragile]{Virtual Hardware}
+  \vfill
+  \begin{center}
+    \url{https://gitlab.ti.bfh.ch/demos/vlab}
+  \end{center}
+  \vfill
+  \begin{center}
+    Username: root, password: (given via Mumble) %lab\$mast3r
+  \end{center}
+  \vfill
+{\tiny
+\begin{verbatim}
+# ./network-driver ens4 ens5 ens6 ens7 - ./switch ens4 ens5 ens6 ens7
+\end{verbatim}
+}
+\end{frame}
+
+
+\begin{frame}{Hardware}
+\begin{itemize}
+\item There are two custom USB-to-4x-Ethernet adapters for each
+      team in the lab.
+\item Please
+      add your name to the list with the number of the adapter taken.
+\item Also take single USB-Ethernet adapters if your notebook/PC
+      does not have an Ethernet port. You may also take an
+      Ethernet cable if needed.
+\item You must bring everything back after the final submission
+      deadline. When you have returned the adapter, you may cross your
+      name off the list again.
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Suggested setup}
+\begin{center}
+\includegraphics[width=0.7\textwidth]{arch.pdf}
+\end{center}
+\end{frame}
+
+
+\section{Software}
+
+\begin{frame}{Skeleton}
+Your Gitlab team repository should have been provisioned with a skeleton
+that is a starting point. It includes:
+\begin{description}
+\item[hub.c] Template for the {\tt hub} project. Add 3 lines to get a working hub!
+\item[switch.c] Template for the {\tt switch} project.
+\item[arp.c] Template for the {\tt arp} project.
+\item[router.c] Template for the {\tt router} project.
+\item[Makefile] Build system.  Modify as needed.
+\item[network-driver.c] Completed driver to allow you to send and receive
+   Ethernet frames. You do not need to modify this code!
+\end{description}
+\end{frame}
+
+
+\begin{frame}[fragile]{Running the network-driver}
+\begin{itemize}
+\item LAN driver provided in C in Git ({\tt glab/network-driver.c})
+\item Launch driver with list of names of physical network device (i.e. ``lan0'')
+      followed by ``-'' followed by the command to run your program:
+\begin{verbatim}
+  $ sudo network-driver eth0 eth1 eth2 - ./my-hub eth0 eth1 eth2
+\end{verbatim}
+  The network devices MUST be passed twice: once to the network-driver
+  as arguments, and once to your program ({\tt hub}, {\tt switch}, {\tt arp}, {\tt router})!
+\item Driver will pass received frames to your {\tt stdin}
+\item Driver will read frames from your {\tt stdout} and pass to network
+\item Driver will not touch {\tt stderr}, you can use {\tt stderr} for logging
+\item Terminate driver via signal (kill) or closing {\tt stdout}
+\end{itemize}
+\begin{center}
+{\bf Your} code can be in {\em any} language!
+\end{center}
+\end{frame}
+
+
+\begin{frame}{The Driver I/O Format}
+\begin{itemize}
+\item First 6 bytes written by driver to your {\tt stdin} are the HW MACs
+      for each of the network interfaces (in the same order).
+\item Henceforth, the message format is 16-bit length prefix (in big endian),
+      followed by 16-bit interface identifier,
+      followed by Ethernet frame (destination MAC, source MAC, etc.).
+\item To send frames, also use 16-bit length prefix followed
+      16-bit interface identifier, followed by Ethernet frame.
+\item Interace number 0 is {\bf reserved} for interacting with the console.
+\item You must set the source MAC correctly (in particular for {\tt arp}/{\tt router})!
+\item Some hardware may not support using source MACs other than your
+      HW MAC. If you do not use the provided equipment, check that you have
+      hardware that supports sending with arbitrary MACs!
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Skeleton: Helper files}
+Other code in the Gitlab team repository:
+\begin{description}
+\item[loop.c] Shared logic for all programs. Functions you may use, but
+   do not need to modify.
+\item[print.c] Replacement for {\tt printf()} given that {\tt stdout}
+   is for Ethernet frames and MUST NOT be used for program output.
+\item[crc.c] Internet checksum. Feel free to use.
+\item[glab.h] Packet format for the interaction with the network-driver.
+\end{description}
+You do NOT have to modify this code, but it may be useful to understand
+it. You MUST re-implement this logic if your project is in languages
+other than C.
+\end{frame}
+
+
+\section{Strategy}
+
+\begin{frame}{Suggested Strategy}
+\begin{itemize}
+\item Understand what a hub/switch/arp/router really has to do.
+\item Plan your data structures first. The algorithms are always trivial.
+      Use simple tables (except for routing).\footnote{Until the {\tt router},
+      you do not need {\tt malloc()} at all!}
+\item For testing, write a program that pretends to be the network driver.
+      Remember the {\tt shell} project from CS Basics. Use {\tt dup}, {\tt fork}
+      and {\tt exec} to run your main program with {\tt stdin}/{\tt stdout}
+      being controlled by your test harness.\footnote{{\tt java.lang.ProcessBuilder}
+      can also be used.}
+\item Perform compatibility tests with real hardware once above tests work.
+\end{itemize}
+Tests and main program do {\bf not} have to be in the same language.
+\end{frame}
+
+
+\begin{frame}{Test requirements}
+  The quality of your tests will {\bf also} be graded.
+  \begin{itemize}
+  \item Make sure your tests are run via the {\tt make check-XXX} target(s).
+  \item The tests should succeed by returning 0, and fail with non-zero.
+  \item {\tt make check-XXX} MUST NOT create binaries like {\tt switch}, {\tt arp}
+    or {\tt router}.
+  \item If you write unit tests for individual functions, please put them
+    under a different target, like {\tt make tests}.  Those will NOT be
+    graded.
+  \end{itemize}
+  Why? We will run your test suite against our reference implementation
+  as well as buggy implementations!
+\end{frame}
+
+
+\begin{frame}{Grading of your code}
+  \begin{itemize}
+  \item If you code does not compile with {\tt make}: 0 points. No discussions.
+  \item If you code exhibits undefined behavior and thus works on your system
+        but not ours: 0 points. No discussions.
+  \item We run tests against your
+    implementation.  Passing our tests gets you points.
+  \item We run your test suite against our correct and
+    buggy ({\tt bugX-XXX}) implementations
+    --- you get points if your test suite finds our bugs {\bf while passing our
+      correct reference implementation}. Bonus points will be awarded for teams
+    that find previously unknown bugs in the reference implementation within
+    the scope of the specification.\footnote{Contact
+      us, if we confirm it is a bug in the reference implementation,
+      you get your bonus.}
+  \item Test your tests against the provided correct and buggy reference
+    implementations!
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Test starting point}
+\begin{verbatim}
+int meta (int argc, char **argv) {
+  int cin[2], cout[2]; pipe (cin); pipe (cout);
+  if (0 == (chld = fork ()) {
+    close (STDIN_FILENO); close (STDOUT_FILENO);
+    close (cin[1]); close (cout[0]);
+    dup2 (cin[0], STDIN_FILENO);
+    dup2 (cout[1], STDOUT_FILENO);
+    execvp (argv[0], argv);
+    printf (stderr, "Failed to run binary `%s'\n", argv[0]);
+    exit (1);
+  }
+  close (cin[0]); close (cout[1]);
+  child_stdin = cin[1]; child_stdout = cout[0];
+  // send MACs, run test, cleanup
+  kill (chld, SIGKILL);
+}
+\end{verbatim}
+
+\end{frame}
+
+\section{Tools}
+
+\begin{frame}{Git}
+The slides and other materials related to the lecture and the project
+are on \url{https://gitlab.bfh.ch/}. You should have obtained the links from
+the official Moodle page of the course.
+
+You must also use Git for your software development. Make sure to only
+share the GitLab repository with your team and the professors. You are
+responsible that your solution is only submitted by your team.
+
+When you have questions about your code, it is helpful if the current
+version of the code is available to the professor on GitLab for
+inspection.
+\end{frame}
+
+\begin{frame}{Cryptpad}
+\url{https://pubcryptpad.pep.foundation/} can be used for collaborative
+editing, be it during lectures or your team work.  A cryptpad has the
+advantage that the data is encrypted before it is transmitted to the
+server.  Thus, unlike proprietary Web-based text editors offered by
+major tech companies, this Free Software solution is compatible with
+privacy regulation.
+
+The key for decryption is in the URL, so be careful with whom you
+share the link to the pad!  When used on-the-spot in lectures, the
+professor will share a link to the respective pad using the Mumble
+chat.
+\end{frame}
+
+\begin{frame}{Mumble}
+Mumble will be primarily used for voice conferencing, including
+lectures and interactive help with the project. The server is
+running 24/7, so you are welcome to use it at any time.
+
+Mumble is Free Software, and the voice is transmitted encrypted
+between the clients and the server.  The server does have access as it
+may mix multiple audio inputs to reduce bandwidth. Note that the
+server we will be using is under control of Prof. Grothoff and
+does not record any information about the server's use.
+
+Mumble can be used to record sessions. You MUST have the consent
+of everyone in the room before recording. Lectures MUST NEVER be
+recorded.
+\end{frame}
+
+\begin{frame}{Mumble: Installation}
+Install Mumble. Clients are available for most
+platforms, see \url{https://wiki.mumble.info/wiki/Installing_Mumble}
+
+Connect to the server '{\tt gnunet.org}'. You are free to pick any username
+(firstname, lastname, nickname), but expect people to address you by
+that username.
+
+Make sure to run the 'audio wizzard' to check your speaker
+and microphone settings. On GNU/Linux distributions, it can
+be helpful to use {\tt pavucontrol} to check/modify general
+system audio settings, such as audio device selection and
+microphone sensitivity.
+
+Mumble has a build-in text chat. Try it.
+\end{frame}
+
+
+\begin{frame}{Mumble: Discipline}
+Make sure to configure push-to-talk in Mumble. With that
+feature, you need to hold a key to activate your microphone:
+
+\url{https://www.mumble.com/support/mumble-server-push-to-talk.php}
+
+In class, holding the key (without speaking!) can be used as
+the virtual equivalent of raising your hand: Mumble indicates
+by the color of the "mouth" of the user in the user list that
+your microphone is on and that you thus are ready to talk.
+
+Do NOT use auto-detection or permanent-on (unless you are actively
+presenting), as that will make echos worse and may also be triggered
+by sounds in your vicinity.
+\end{frame}
+
+\begin{frame}{Mumble: Channels}
+The server is setup to have several channels related to the course,
+under the root BTIxxxx.
+
+Use the "lecture" channel to listen to presentations from the
+professors. You should watch for the professor joining the "lecture"
+channel, as that is likely a sign that there is some announcement to
+be made.
+
+Use your team's channel to discuss within your team and/or with the
+professor.  To invite the professor to join your team's channel, join
+the lobby to invite professors. Make sure to mention to the professor
+which team channel to join.
+
+You can create additional temporary channels (like if all existing team
+channels are in use). Simply right-click on the BTIxxxx channel and
+select "add".
+
+Do not join 'private' channels on the server that are in use unless
+you have been invited.
+\end{frame}
+
+\end{document}

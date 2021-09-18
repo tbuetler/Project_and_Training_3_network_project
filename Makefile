@@ -1,5 +1,5 @@
 all = instructions programs tests
-instructions = nprj0.pdf nprj1.pdf nprj2.pdf nprj3.pdf faq.pdf
+instructions = nprj0.pdf nprj1.pdf nprj2.pdf nprj3.pdf faq.pdf kickoff-slides.pdf
 programs = parser hub switch arp router
 tests = test-hub
 

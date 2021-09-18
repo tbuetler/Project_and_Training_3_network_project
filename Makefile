@@ -1,4 +1,4 @@
-instructions = nprj1.pdf nprj2.pdf nprj3.pdf faq.pdf
+instructions = nprj0.pdf nprj1.pdf nprj2.pdf nprj3.pdf faq.pdf
 programs = parser hub switch vswitch arp router
 CFLAGS = -O0 -g # -Wall
 
@@ -8,8 +8,8 @@ network-driver: network-driver.c glab.h
 	gcc -g -O0 -Wall -o network-driver network-driver.c
 
 # Try to build instructions, but do not fail hard if this fails:
-# the CI doesn't have pdflatex...
-$(instructions): %.pdf: %.tex
+# The CI doesn't have pdflatex...
+$(instructions): %.pdf: %.tex bonus.tex code.tex grading.tex setup.tex testing.tex
 	pdflatex $<  || true
 	pdflatex $<  || true
 	pdflatex $<  || true
@@ -20,10 +20,15 @@ clean:
 $(programs): %: %.c glab.h loop.c print.c
 	gcc $(CFLAGS) $< -o $@
 
-check: check-switch check-arp check-router
+test-hub: test-hub.c harness.c harness.h
+	gcc $(CFLAGS) $^ -o $@
 
+check: check-hub check-switch check-arp check-router
+
+check-hub: test-hub
+	./test-hub ./hub
 check-switch: test-switch
-	./test-switch ./switc
+	./test-switch ./switch
 check-arp: test-arp
 	./test-arp ./arp
 check-router: test-router

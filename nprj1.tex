@@ -51,9 +51,6 @@ There will be three main deliverables for the sprint:
   {\bf document} {\em interoperability} tests against existing
   implementations (i.e. other notebooks from your team to ensure that
   your switch integrates correctly with other implementations).
-\item[Design and documentation] You must design the main
-  data structure (switching table), the switching algorithm
-  and create a {\bf comprehensive test plan}.
 \end{description}
 
 
@@ -67,263 +64,40 @@ We will specifically also look for the following properties of a switch:
   addresses.  Ensure your switch's learning table uses finite memory.
 \end{itemize}
 
-\subsection{Testing}
+\input{testing.tex}
 
-For your test plans, please make sure to supply the
-following information for each test:
-
-\begin{itemize}
-  \item Test Case ID --- This field uniquely identifies a test case.
-  \item Test case Description/Summary --- This field describes the test case objective.
-  \item Pre-requisites --- This field specifies the conditions or steps that must be followed before the test steps executions.
-  \item Test steps --- In this field, the exact steps are mentioned for performing the test case.
-  \item Expected Results --- successful test
-  \item Author --- Name of the Tester.
-  \item Automation --- Whether this test case is automated or not.
-  \item Status --- Pass/fail with date and code version.
-\end{itemize}
-
-Note that in addition to automated tests similar to the {\tt
-  public-test-switch} you {\bf should} probably do integration tests
-in a real network (evaluating manually with ping, wireshark, etc.).
-This will help you find problems in your implementation and ensure
-that your understanding of the network protocols is correct. Such
-integration tests should be documented and will be graded as part of
-the technical documentation.
-
-
-\subsection{Design and Documentation}
-
-The final documentation should include:
-  \begin{itemize}
-  \item Title page with group number and names/kurzel of all participants.
-  \item Table of contents
-  \item Introduction text (mention objectives and targeted audience)
-  \item Data structure (switching table)
-  \item Algorithm (switching algorithm) (use UML state diagram)
-  \item Test strategy
-  \item Product backlog and sprint backlog (Scrum)
-  \item Glossary
-  \item Bibliography
-\end{itemize}
-
-Text throughout must explain methods as well as justifications for
-choices made (why not other choices). The organisation should clearly
-indicate sections and sub-sections.  The language should have a
-consistent voice with a fairly consistent register (semi-formal).  The
-goal is clarity with minimal repetition.  Concise language techniques
-(relative clauses, linking words...) are expected to be employed
-without forfeiting clarity.  You should also use appropriate graphical
-representations and pay attention to how you visualize code.
-Algorithms and data structures should be presented in diagrams or with
-pseudo-code, but NOT in C syntax.
-
-Documentation must be written in Markup and included in the Git, {\bf
-  but} must also be submitted by the deadline as a PDF to the
-respective Moodle assignment folder for grading by the English
-professors.
-
-
-\section{Grading}
-
-{\bf All deliverables must be submitted to Git} (master branch) by the
-submission deadline announced on Moodle. The PDF files generated from
-the Markup documentation must {\bf additionally be submitted via Moodle}.
-
-You are expected to work in a team of {\bf four students}.  If needed,
-Prof. Grothoff may permit the creation of a team of 5 students or
-teams of 3 students.  Each team is responsible for dividing up the
-work and coordinating as needed (SCRUM).
-
-You can earn 16, 15 and 19 points in the three networking sprints, for
-a total of 50 points.  You need {\bf 37 points} to pass the networking
-component of BTI 3021.
-
-If your team is {\bf for good reasons} smaller than four students, the
-passing threshold will be lowered by {\bf 2 points} per ``missing''
-student per sprint.  So a student going alone would still need {\bf 19
-  points} to pass.
-
-Teams may {\bf request} changes to team membership at the end of a
-sprint, but must provide a {\bf justification} to the course
-coordinator, who may approve or decline the request.
-
-
+\input{grading.tex}
 
 \subsection{Switch grading}
 
 For the {\bf switch} sprint, you get points for each of the key deliverables:
 \begin{center}
 \begin{tabular}{l|r}
-Correct implementation                    &  7 \\ \hline
-Comprehensive test cases                  &  4 \\ \hline
-Technical documentation (A\&D, test plan) &  3 \\ \hline
-Quality of English in documentation       &  2 \\ \hline \hline
-Total                                     & 16
+Correct implementation                    &  8 \\ \hline
+Comprehensive test cases                  &  4 \\ \hline \hline
+Total                                     & 12
 \end{tabular}
 \end{center}
 
 \subsubsection{Correct implementation}
 \begin{itemize}
-\item 3 points for passing public test cases
-\item 4 points for passing secret test cases (see Section~\ref{sec:binaries})
+  \item 8 points for passing test cases
 \end{itemize}
 
 \subsubsection{Comprehensive test cases}
 \begin{itemize}
 \item 0 points if public reference implementation (see Section~\ref{sec:binaries})
       fails test cases, {\bf otherwise}
-\item 2 points for failing public buggy implementation (see Section~\ref{sec:binaries}),
-       plus
-\item 2 points for finding bugs in secret buggy implementation(s)
+\item 4 points for failing public buggy implementations (see Section~\ref{sec:binaries})
 \end{itemize}
 
-If you believe you have found a bug in the provided reference
-implementation, you are encouraged to discuss it with the
-instructor. If you have found an actual bug in the reference
-implementation (that is within the scope of the assignment), you will
-be awarded a {\bf bonus point} per acknowledged bug.
+\input{bonus.tex}
 
-
-\subsubsection{Technical documentation}
-\begin{itemize}
-\item 1 point for good description of data structure
-\item 1 point for good description of switching algorithm
-\item 1 point for good description of test cases
-\end{itemize}
-Partial points may be awarded.
-
-\subsubsection{Quality of the English in the documentation}
-
-\begin{itemize}
-\item 1 point for organisation / comprehension / consistency
-\item 1 point for correct grammar / spelling / punctuation
-\end{itemize}
-Partial points may be awarded.
-
-
-
-\section{Hardware}
-
-You will be given a 4-port Ethernet USB adapter that you can use to
-add four physical ports to any PC.  If you use the laboratory PCs, be
-aware that some of the USB ports provide insufficient power. Which
-ones work is inconsistent even across identical PCs and often even the
-adjacent USB port works even though it looks identical!
-
-You are not expected to write a driver to interact directly with the
-Ethernet USB adapter.  Instead, you will use the provided
-{\tt network-driver} which can already provide you with raw access
-to any Ethernet interface (incl. WLAN).
-
-\subsection{Alternative setup with virtual machines}
-
-
-Clone the Git repository at
-\url{https://gitlab.ti.bfh.ch/demos/vlab} and follow the provided
-instructions.
-
-\section{The {\tt network-driver}}
-
-To access the hardware, your final program should be {\em executed}
-by the {\tt network-driver}.  For this, you call
-\begin{verbatim}
-$ network-driver IFC1 ... IFCn - ./switch ARGS
-\end{verbatim}
-where ``IFC1 ... IFCn'' is the list of interface names that you want
-{\tt network-driver} to support (i.e. ``lan0'', ``lan1'') and ``PROG''
-is the name of your binary and ``ARGS'' are the command-line arguments
-to ``switch''.  Note the ``-'' (single minus) between the last
-interface name and ``switch''.  Also, ``./switch'' must be given with
-its path (i.e. ``./switch'' for the current working directory) or be
-located in a directory that is given in the ``PATH'' environment
-variable.
-
-Once you start {\tt switch} like this, you can read Ethernet frames
-and end-user commands from ``stdin'' and write Ethernet
-frames (and end-user output) to ``stdout''.
-
-Note that you must follow the {\tt network-driver}'s particular
-format for inter-process communication when reading and writing.
-You will {\bf not} be communicating directly with the console!
-
-
-\subsection{Build the driver}
-
-To compile the code, run:
-\begin{verbatim}
-# This requires gcc
-$ make
-# Creating network interfaces requires 'root' rights
-$ sudo chmod +s network-driver
-# Try it out:
-$ ./network-driver eth0 - ./parser
-\end{verbatim}
-Press CTRL-C to stop the {\tt network-driver} and {\tt parser}.
-
-
-\subsection{Understanding the driver}
-
-The output of the driver is always in binary and generally in network
-byte order.  You can use a tool like {\tt hexer} to make the output
-slightly more readable.
-
-The driver will always output a series of messages starting with
-a {\tt struct GLAB\_MessageHeader} that includes a type and a size.
-
-When the driver starts, it first writes a control message (of type 0)
-with payload that includes 6 bytes for each of the local interface's
-MAC addresses to your {\tt stdin}.  Henceforce, messages received
-of type 0 will be single lines of command-line input (including the
-'\\n'-terminator, but excluding the 0-terminator of C) as typed in
-by the user.
-
-Furthermore, the driver will output a {\tt struct GLAB\_MessageHeader}
-for each frame received.  The {\tt struct GLAB\_MessageHeader} will be
-followed by the actual network frame, starting with the Ethernet frame
-excluding preamble, delimiter and FCS.  The {\tt struct
-  GLAB\_MessageHeader} includes the total length of the subsequent
-frame (encoded in network byte order, the size includes the {\tt
-  struct GLAB\_MessageHeader}).  The fixed message type identifies the
-number of the network interface, counting from one (also in network
-byte order).
-
-In addition to writing received frames to your {\tt stdin}, the driver
-also tries to read from your {\tt stdout}.  Applications must send the
-same message format to {\tt stdout} that the driver sends them on {\tt
-  stdin}.  The driver does {\bf not} check that the source MAC is set
-correctly!
-
-To write to the console's {\tt stdout}, use a message type of 0.
-You may directly write to {\tt stderr} for error messages.
-
+\input{setup.tex}
 
 \section{Provided code}
 
-You are given a few C snippets as starting points. However, these
-mostly serve to {\em illustrate} how to process the output from the
-driver. You are completely free to implement your application in {\em
-  any} programming language.  Note that each file includes about 20
-LOC of a licensing statement, so the functions provided should not
-provide a significant advantage for implementations in C.
-
-\begin{description}
-\item[sample-parser.c]{This file includes a simple starting point for
-  a wireshark-like frame inspection code.
-  It mostly shows how the frames are received and
-  a bit how to use the other C files. (82 LOC)}
-\item[glab.h]{A struct defining a MAC Address and a few common C includes. (90 LOC)}
-\item[print.c]{This file shows how to wrap messages to print them
-  via the driver. (112 LOC)}
-\item[loop.c]{This could be the main loop of your application. The code includes
-  some basic logic that looks at each frame, decides whether it is the MACs,
-  control or an Ethernet frame and then calls the respective function. (93 LOC)}
-\item[crc.c]{An implementation of checksum algorithms. (194 LOC)}
-\end{description}
-
-If you are using another programming language, you are free to re-use
-an existing CRC implementation in that language.
-
+\input{code.tex}
 
 The main file for the exercise is {\tt switch.c}. In this file, you should
 implement a program {\tt switch} which forwards frames received on any
@@ -334,11 +108,12 @@ and optimizes subsequent traffic.
 \section{Provided binaries} \label{sec:binaries}
 
 You are provided with several binaries:
+
 \begin{description}
 \item[public-test-switch] A public test case, run using ``./public-test-switch ./switch''
   to test your switch. Returns 0 on success.
 \item[public-switch] Reference implementation of the ``switch''.
-\item[public-bug-switch] Buggy implementation of a ``switch``.
+\item[public-bug-switch] Buggy implementation of a ``switch''.
 \end{description}
 
 
@@ -355,6 +130,7 @@ have the following {\tt make} targets:
 \item[check-switch] Run ``test-switch`` against the ``switch'' binary.
 \end{description}
 
+
 For grading, we will basically run commands like:
 \begin{verbatim}
 GRADE=0
@@ -367,30 +143,10 @@ $ cp public-switch switch
 $ make check-switch || GRADE=0
 echo "Test grade: $GRADE"
 \end{verbatim}
-You must thus make sure the build system continues to create programs in the
-right (top-level) location!
 
+You must thus make sure the build system continues to create programs
+in the right (top-level) location!
 
-\section{Warm-up exercises}
-
-These exercises may help you get familiar with the provided environment.
-They are {\bf not graded}.
-
-\subsection{Frame parsing}
-
-Extend the simple frame {\tt parser} to:
-\begin{enumerate}
-\item Output your system's MAC address(es) in the canonical human-readable format.
-\item Output the source MAC, destination MAC, payload type and payload length
-  of each frame received. Confirm your results with {\tt wireshark}.
-\end{enumerate}
-
-\subsection{Implement a Hub}
-
-Implement {\tt hub} which forwards frames received on any interface to
-all other interfaces ({\tt eth0} through {\tt eth3}), without changing
-them at all.  The {\tt hub} binary should take the list of interfaces
-to use on the command line.
 
 
 \section{Bonus exercise}

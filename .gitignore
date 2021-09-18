@@ -1,0 +1,16 @@
+*.log
+*.pdf
+*.aux
+arp
+hub
+parser
+router
+switch
+vswitch
+*.out
+network-driver
+test-hub
+test-switch
+test-router
+test-arp
+*~

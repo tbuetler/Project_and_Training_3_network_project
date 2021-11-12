@@ -36,6 +36,7 @@ check-arp: test-arp
 	./test-arp ./arp
 check-router: test-router
 	./test-router ./router
-
+arch.pdf: arch.svg
+	rsvg-convert -f pdf -o arch.pdf arch.svg
 
 .PHONY: clean check check-hub check-switch check-arp check-router

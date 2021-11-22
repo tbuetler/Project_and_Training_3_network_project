@@ -1,11 +1,10 @@
-all = programs tests
+all = networ-driver programs tests
 instructions = nprj0.pdf nprj1.pdf nprj2.pdf nprj3.pdf faq.pdf kickoff-slides.pdf
 programs = parser hub switch arp router
 tests = test-hub
 
 CFLAGS = -O0 -g # -Wall
 
-all: network-driver $(instructions) $(programs)
 
 network-driver: network-driver.c glab.h
 	gcc -g -O0 -Wall -o network-driver network-driver.c

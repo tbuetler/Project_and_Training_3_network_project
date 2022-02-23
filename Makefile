@@ -1,7 +1,10 @@
-all = networ-driver programs tests
 instructions = nprj0.pdf nprj1.pdf nprj2.pdf nprj3.pdf faq.pdf kickoff-slides.pdf nprjw.pdf
 programs = parser hub switch vswitch arp router
-tests = test-hub
+tests = test-hub # test-switch test-vswitch test-arp test-router
+
+all: network-driver $(programs) $(tests)
+docs: $(instructions)
+
 
 CFLAGS = -O0 -g # -Wall
 
@@ -24,6 +27,14 @@ $(programs): %: %.c glab.h loop.c print.c crc.c
 
 test-hub: test-hub.c harness.c harness.h
 	gcc $(CFLAGS) $^ -o $@
+#test-switch: test-switch.c harness.c harness.h
+#	gcc $(CFLAGS) $^ -o $@
+#test-vswitch: test-vswitch.c harness.c harness.h
+#	gcc $(CFLAGS) $^ -o $@
+#test-arp: test-arp.c harness.c harness.h
+#	gcc $(CFLAGS) $^ -o $@
+#test-router: test-router.c harness.c harness.h
+#	gcc $(CFLAGS) $^ -o $@
 
 check: check-hub check-switch check-arp check-router
 

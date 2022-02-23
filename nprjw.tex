@@ -14,7 +14,10 @@
 
 This project is ONLY for students repeating BTI 3021!  Unlike the
 three sprints for first-time students, you must work in teams of
-{\bf at most two students} for this project.
+{\bf at most two students} for this project.  To pass the
+networking part of BTI 3021, you must achieve a total of
+{\bf 20} points in this project.  The deadline is the same deadline
+as for sprint 3.
 
 For this project you will implement, document and test an Ethernet
 {\bf vswitch} in userland under GNU/Linux.
@@ -51,9 +54,32 @@ There will be two main deliverables for the sprint:
 
 \subsection{Functionality}
 
+Implement {\em vswitch} which forwards frames received on any
+interface to any other interface, passively learns MAC addresses,
+and respects VLAN tags. As before, the command-line specifies the
+list of network interfaces you should switch on, but with
+additional options to specify the VLANS.  Example:
+\begin{verbatim}
+$ network-driver eth0 eth1 eth2 eth3 - \
+  vswitch eth0[T:1,2] eth1[U:1] eth2[U:2] eth3[U:2]
+\end{verbatim}
+This is supposed to run VLANs 1 and 2 tagged on {\tt eth0},
+and VLANs 1, 2 or 2 untagged on {\tt eth1}, {\tt eth2},
+or {\tt eth3} respectively.  Network interfaces specified
+without ``[]'' should operate untagged on VLAN 0.  It is
+not allowed to have interfaces accept both tagged and
+untagged frames.
+
+You may want to test your implementation against the Netgear
+switch of the lab. For example, you could
+Bridge a tagged VLAN ({\tt VID}$=3$) from the Netgear switch ({\tt
+  eth1}) with two untagged notebooks ({\tt eth2}, {\tt eth3}) using
+your vswitch code.
+
+
 We will specifically also look for the following properties of a vswitch:
 \begin{itemize}
-\item Adding and removing VLAN tags
+\item Adding and stripping VLAN tags
 \item Proper separation of VLANs
 \item Support for multicast and broadcast
 \item Changing external connections (re-learning when devices move around the network)
@@ -71,9 +97,9 @@ We will specifically also look for the following properties of a vswitch:
 For the {\bf vswitch} sprint, you get points for each of the key deliverables:
 \begin{center}
 \begin{tabular}{l|r}
-Correct implementation                    &  8 \\ \hline
+Correct implementation                    & 18 \\ \hline
 Comprehensive test cases                  &  6 \\ \hline \hline
-Total                                     & 14
+Total                                     & 24
 \end{tabular}
 \end{center}
 

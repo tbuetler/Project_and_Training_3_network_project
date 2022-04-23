@@ -21,15 +21,11 @@ faculty members.
 Read faq.pdf for frequently asked questions about the project!
 
 
-COVID-19:
+Mentoring
 =========
 
-You are allowed to organize your team as a virtual team and/or to
-simply meet off-site.  To interact with Prof. Grothoff, you may use
-Mumble (https://mumble.sf.net) using the server 'gnunet.org' (no
-password required).  You may also use Mumble (chat + voice) for your
-team discussions if you so choose.
-
-Prof. Grothoff will be available on Mumble during class hours, but of
-course may be busy with on-site teams as well.  Using the Mumble chat
-is recommended to leave a message.
+You can schedule mentoring sessions during class times on Jitsi with
+any of the involved faculty members. Jitsi is the official FLOSS BFH
+online video conferencing solution available at
+https://bfh.meet.switch.ch/$ROOM.
+You can simply create any $ROOM of your choice.

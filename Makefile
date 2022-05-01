@@ -1,5 +1,5 @@
 instructions = nprj0.pdf nprj1.pdf nprj2.pdf nprj3.pdf faq.pdf kickoff-slides.pdf nprjw.pdf
-programs = parser hub switch vswitch arp router
+programs = sample-parser hub switch vswitch arp router
 tests = test-hub # test-switch test-vswitch test-arp test-router
 
 all: network-driver $(programs) $(tests)

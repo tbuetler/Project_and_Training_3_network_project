@@ -277,6 +277,7 @@ version of the code is available to the professor on GitLab for
 inspection.
 \end{frame}
 
+
 \begin{frame}{Cryptpad}
 \url{https://pubcryptpad.pep.foundation/} can be used for collaborative
 editing, be it during lectures or your team work.  A cryptpad has the
@@ -294,10 +295,10 @@ chat.
 
 \begin{frame}{Jitsi}
 
-BFH's official Jitsi server {\bf bfh.meet.switch.ch} will be
-primarily used for voice conferencing, including
-interactive help with the project. The server is
-running 24/7, so you are welcome to use it at any time.
+Init7 hosts a public Jitsi server at {\bf meet.zrh.init7.ch} which you
+can use for voice conferencing, including interactive help with the
+project. The server is running 24/7, so you are welcome to use it at
+any time.
 
 Jitsi can be used to record sessions. You MUST have the consent
 of everyone in the room before recording. Lectures MUST NEVER be
@@ -310,9 +311,41 @@ To receive support via Jitsi, you must first send an e-mail to the
 respective instructor asking for help.  Support will be provided only
 during the official support period.  The instructor will reply with a
 URL and time.
+\vfill
 
 You may ask on the day itself.
+
+\vfill
+\pause
+\begin{center}
+  Prof. Grothoff is NOT available on November 28th 2022. You may
+  instead schedule appointments with him on November 26th or 26th.
+\end{center}
 \end{frame}
+
+
+\begin{frame}[fragile]{Klocwork (NEW)}
+  Klocwork is a static analysis tool for C/C++. It can help you automatically
+  find bugs!
+  \begin{itemize}
+  \item Download client binaries from {\tt https://grothoff.org/christian/klocwork.zip}.
+  \item Make sure to include the unpacked {\tt bin/} directory in your PATH.
+  \item Each group needs an account with username/password. Talk to me
+    after this lesson or schedule an online appointment.
+  \end{itemize}
+  Minimal instructions:
+\begin{verbatim}
+$ mkdir $HOME/.kwtables/
+$ kwauth --url http://firefly.gnunet.org:53241/
+$ cd $YOUR_CODE; make clean; kwinject make
+$ kwbuildproject --url http://firefly.gnunet.org:53241/$GROUP \
+     --tables-directory=$HOME/.kwtables/ kwinject.out
+$ kwadmin --url  http://firefly.gnunet.org:53241/ \
+     load $GROUP $HOME/.kwtables/
+\end{verbatim}
+\end{frame}
+
+
 
 
 \end{document}

@@ -1,7 +1,7 @@
 \documentclass{beamer}
 \title{Project \& Training 3: Networking Project}
 %\subtitle{SUBTITLE}
-\date{KW 47/2022}
+\date{KW 16/2023}
 \author{Hansj\"urg Wenger \& Christian Grothoff}
 \institute{Berner Fachhochschule}
 
@@ -318,34 +318,10 @@ You may ask on the day itself.
 \vfill
 \pause
 \begin{center}
-  Prof. Grothoff is NOT available on November 28th 2022. You may
-  instead schedule appointments with him on November 26th or 26th.
+  Prof. Grothoff is NOT available on June 12th 2023. You may
+  instead schedule appointments with him on June 11th.
 \end{center}
 \end{frame}
-
-
-\begin{frame}[fragile]{Klocwork (NEW)}
-  Klocwork is a static analysis tool for C/C++. It can help you automatically
-  find bugs!
-  \begin{itemize}
-  \item Download client binaries from {\tt https://grothoff.org/christian/klocwork.zip}.
-  \item Make sure to include the unpacked {\tt bin/} directory in your PATH.
-  \item Each group needs an account with username/password. Talk to me
-    after this lesson or schedule an online appointment.
-  \end{itemize}
-  Minimal instructions:
-\begin{verbatim}
-$ mkdir $HOME/.kwtables/
-$ kwauth --url http://firefly.gnunet.org:53241/
-$ cd $YOUR_CODE; make clean; kwinject make
-$ kwbuildproject --url http://firefly.gnunet.org:53241/$GROUP \
-     --tables-directory=$HOME/.kwtables/ kwinject.out
-$ kwadmin --url  http://firefly.gnunet.org:53241/ \
-     load $GROUP $HOME/.kwtables/
-\end{verbatim}
-\end{frame}
-
-
 
 
 \end{document}

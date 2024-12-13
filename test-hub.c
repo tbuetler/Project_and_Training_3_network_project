@@ -278,5 +278,7 @@ main (int argc,
            "Final grade: %u/%u\n",
            grade,
            possible);
+  if (grade < possible)
+    return 1;
   return 0;
 }

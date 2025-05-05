@@ -189,18 +189,82 @@ parse_frame (struct Interface *ifc,
              size_t frame_size)
 {
   struct EthernetHeader eh;
+  struct ArpHeaderEthernetIPv4 ah;
   const char *cframe = frame;
 
+// check if the frame size is at least the size of an Ethernet header
   if (frame_size < sizeof (eh))
   {
     fprintf (stderr,
              "Malformed frame\n");
     return;
   }
+
+  // copy the ethernet header from the frame
   memcpy (&eh,
           frame,
           sizeof (eh));
   /* DO WORK HERE */
+
+// TODO: work done by tim - just in case there are errors :)
+  // check if the ethernet frame contains an ARP packet (ethernet type 0x0806)
+  if (ntohs (eh.tag) != 0x0806) // check if it's an ARP packet
+    return;
+
+  // copy the ARP header from the frame
+  memcpy (&ah,cframe + sizeof(eh), sizeof (ah));
+
+  // validate the ARP packet fields
+  if (ntohs(ah.htype) != 1                      // HW type must be ethernet
+      || ntohs(ah.ptype) != 0x0800              // protocol type must be IPv4
+      || ah.hlen != MAC_ADDR_SIZE               // HW address length must be MAC_ADDR_SIZE
+      || ah.plen != sizeof(struct in_addr))     // protocol address length must match IPv4 size
+  {
+    fprintf (stderr, "Malformed frame\n");
+    return;
+  }
+
+  // check if the ARP operation is a request (1)
+  if (ntohs(ah.oper) == 1) // ARP request
+  {
+    // verify if the target IP address matches the interface's IP address
+    if (memcmp(&ah.target_pa, &ifc->ip, sizeof(struct in_addr)) == 0)
+    {
+      // create ARP reply
+      struct EthernetHeader reply_eh;
+      struct ArpHeaderEthernetIPv4 reply_ah;
+
+      // set ethernet header fields
+      reply_eh.dst = eh.src;                    // destination MAC is the source MAC of the request
+      reply_eh.src = ifc->mac;                  // source MAC is the interface's MAC address
+      reply_eh.tag = ntohs(0x806);              // ethernet type for ARP
+
+      // set ARP header fields
+      reply_ah.htype = htons(1);                // HW type is ethernet
+      reply_ah.ptype = htons(0x0800);           // protocol type is IPv4
+      reply_ah.hlen = MAC_ADDR_SIZE;            // HW address length is MAC_ADDR_SIZE
+      reply_ah.plen = sizeof(struct in_addr);   // protocol address length is IPv4 size
+      reply_ah.oper = htons(2);                 // operation is reply
+      reply_ah.sender_ha = ifc->mac;            // sender MAC is the interface's MAC address
+      reply_ah.sender_pa = ifc->ip;             // sender IP is the interface's IP address
+      reply_ah.target_ha = ah.sender_ha;        // target MAC is the sender MAC
+      reply_ah.target_pa = ah.sender_pa;        // target IP is the sender IP
+
+      // combine ethernet and ARP headers into a single frame
+      char reply_frame[sizeof(reply_eh) + sizeof(reply_ah)];
+      memcpy(reply_frame, &reply_eh, sizeof(reply_eh));
+      memcpy(reply_frame + sizeof(reply_eh), &reply_ah, sizeof(reply_ah));
+
+      // send the ARP reply
+      forward_to(ifc, reply_frame, sizeof(reply_frame));
+    }
+  }
+  // check if the ARP operation is a reply (2)
+  else if (ntohs(ah.oper) == 2) // ARP reply
+  {
+    // TODO: store senders MAC and IP in ARP cache
+    add_to_arp_cache(&ah.sender_ha, &ah.sender_pa);
+  }
 }
 
 
@@ -456,6 +520,61 @@ handle_mac (uint16_t ifc_num,
   if (ifc_num > num_ifc)
     abort ();
   gifc[ifc_num - 1].mac = *mac;
+}
+
+
+// TODO: Built an arp cache by tim
+#define ARP_CACHE_SIZE 256  // Size of the ARP cache
+
+struct ArpCacheEntry {
+    struct in_addr ip;      // IPv4 address
+    struct MacAddress mac;  // MAC address
+    int valid;              // Entry validity flag
+};
+
+// static array to store the ARP cache entries
+static struct ArpCacheEntry arp_cache[ARP_CACHE_SIZE];
+
+/**
+ * Hash function for IP addresses.
+ * This function computes a hash value for an IPv4 address to determine its index in the ARP cache.
+ * *Disclaimer: This idea has been provided by an AI*
+ */
+static unsigned int hash_ip(const struct in_addr *ip) {
+    return ntohl(ip->s_addr) % ARP_CACHE_SIZE;  // use modulo operation to limit the index
+}
+
+/**
+ * Add an entry to the ARP cache.
+ * This function updates the ARP cache with the given IP address and MAC address.
+ * If an entry already exists for the IP, it is overwritten
+ */
+void add_to_arp_cache(const struct in_addr *ip, const struct MacAddress *mac) {
+    unsigned int index = hash_ip(ip);   // compute the index using the hash function
+    arp_cache[index].ip = *ip;          // store the IP address in the cache
+    arp_cache[index].mac = *mac;        // store the MAC address in the cache
+    arp_cache[index].valid = 1;         // mark the entry as valid
+}
+
+/**
+ * Remove an entry from the ARP cache.
+ */
+void remove_from_arp_cache(const struct in_addr *ip) {
+    unsigned int index = hash_ip(ip);
+    if (arp_cache[index].valid && memcmp(&arp_cache[index].ip, ip, sizeof(struct in_addr)) == 0) {
+        arp_cache[index].valid = 0;
+    }
+}
+
+/**
+ * Lookup a MAC address in the ARP cache by IP.
+ */
+struct MacAddress *lookup_arp_cache(const struct in_addr *ip) {
+    unsigned int index = hash_ip(ip);
+    if (arp_cache[index].valid && memcmp(&arp_cache[index].ip, ip, sizeof(struct in_addr)) == 0) {
+        return &arp_cache[index].mac;
+    }
+    return NULL;
 }
 
 

@@ -39,6 +39,18 @@
 #define ETH_P_ARP 0x0806
 #endif
 
+// TODO: Tim
+#define ROUTE_TABLE_SIZE 256
+
+struct RouteEntry {
+    struct in_addr target_network; // network address
+    struct in_addr target_netmask; // netmask
+    struct in_addr next_hop; // next hop
+    struct Interface *ifc; // interface
+    int valid; // entry validity flag
+};
+
+static struct RouteEntry route_table[ROUTE_TABLE_SIZE];
 
 /**
  * gcc 4.x-ism to pack structures (to be used before structs);
@@ -377,6 +389,20 @@ route (struct Interface *origin,
        size_t payload_size)
 {
   /* TODO: do work here */
+    for (int i = 0; i < ROUTE_TABLE_SIZE; i++) {
+      if (route_table[i].valid &&
+          (ip->destination_address.s_addr & route_table[i].target_netmask.s_addr) ==
+          route_table[i].target_network.s_addr) {
+        struct MacAddress *next_hop_mac = lookup_arp_cache(&route_table[i].next_hop);
+        if (next_hop_mac) {
+          forward_frame_payload_to(route_table[i].ifc, next_hop_mac, ETH_P_IPV4, ip, payload_size);
+        } else {
+          fprintf(stderr, "No ARP entry for next hop %s\n", inet_ntoa(route_table[i].next_hop));
+        }
+        return;
+      }
+    }
+fprintf(stderr, "No route to host %s\n", inet_ntoa(ip->destination_address));
 }
 
 
@@ -393,6 +419,20 @@ handle_arp (struct Interface *ifc,
             const struct ArpHeaderEthernetIPv4 *ah)
 {
   /* TODO: do work here */
+    if (ntohs(ah->oper) == 1) { // ARP Request
+      if (memcmp(&ah->target_pa, &ifc->ip, sizeof(struct in_addr)) == 0) {
+        struct ArpHeaderEthernetIPv4 reply = *ah;
+        reply.oper = htons(2); // ARP Reply
+        reply.target_ha = ah->sender_ha;
+        reply.target_pa = ah->sender_pa;
+        reply.sender_ha = ifc->mac;
+        reply.sender_pa = ifc->ip;
+
+        forward_frame_payload_to(ifc, &ah->sender_ha, ETH_P_ARP, &reply, sizeof(reply));
+      }
+    } else if (ntohs(ah->oper) == 2) { // ARP Reply
+      add_to_arp_cache(&ah->sender_pa, &ah->sender_ha);
+    }
 }
 
 
@@ -557,6 +597,18 @@ process_cmd_arp ()
     return;
   }
   /* TODO: do MAC lookup */
+  if (0 == lookup_arp_cache(&v4, &mac))
+    {
+      printf ("MAC address for %s on interface %s is %02X:%02X:%02X:%02X:%02X:%02X\n",
+              inet_ntoa(v4), ifc->name,
+              mac.addr[0], mac.addr[1], mac.addr[2],
+              mac.addr[3], mac.addr[4], mac.addr[5]);
+    }
+    else
+    {
+      fprintf (stderr, "No ARP entry for %s on interface %s\n",
+               inet_ntoa(v4), ifc->name);
+    }
 }
 
 
@@ -709,6 +761,8 @@ process_cmd_route_add ()
                         &ifc))
     return;
   /* TODO: Add routing table entry */
+  if (0 == add_route(&target_network, &target_netmask, &next_hop, ifc))
+      printf("Route added successfully\n");
 }
 
 
@@ -729,6 +783,8 @@ process_cmd_route_del ()
                         &ifc))
     return;
   /* TODO: Delete routing table entry */
+  if (0 == delete_route(&target_network, &target_netmask))
+      printf("Route deleted successfully\n");
 }
 
 
@@ -739,6 +795,7 @@ static void
 process_cmd_route_list ()
 {
   /* TODO: show routing table with 'print' */
+  print_routing_table();
 }
 
 

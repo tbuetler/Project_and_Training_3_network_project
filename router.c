@@ -52,6 +52,74 @@ struct RouteEntry {
 
 static struct RouteEntry route_table[ROUTE_TABLE_SIZE];
 
+#define ARP_CACHE_SIZE 256
+
+struct ArpCacheEntry {
+    struct in_addr ip;      // IPv4 address
+    struct MacAddress mac;  // MAC address
+    int valid;              // Entry validity flag
+};
+
+static struct ArpCacheEntry arp_cache[ARP_CACHE_SIZE];
+
+/**
+ * Look up a MAC address in the ARP cache by IP address.
+ *
+ * @param ip IP address to look up
+ * @return Pointer to MAC address if found, NULL if not found
+ */
+static struct MacAddress*
+lookup_arp_cache(const struct in_addr *ip)
+{
+    // iterate through all entries in the ARP cache
+    for (int i = 0; i < ARP_CACHE_SIZE; i++) {
+        // check if the entry is valid and matches the input IP
+        if (arp_cache[i].valid &&
+            arp_cache[i].ip.s_addr == ip->s_addr) {
+            return &arp_cache[i].mac; //return pointer to MAC address
+        }
+    }
+    return NULL; // entry not found
+}
+
+
+/**
+ * Add or update an entry in the ARP cache
+ *
+ * @param ip IP address to add/update
+ * @param mac MAC address to associate with the IP
+ * @return 0 on success, -1 if cache is full
+ */
+static int
+add_to_arp_cache(const struct in_addr *ip, const struct MacAddress *mac)
+{
+    // First try to update existing entry
+    for (int i = 0; i < ARP_CACHE_SIZE; i++) {
+        if (arp_cache[i].valid
+            && arp_cache[i].ip.s_addr == ip->s_addr) {
+                arp_cache[i].mac = *mac; //update the MAC adress
+                return 0; //success
+        }
+    }
+
+    // if no existing entry found, find first empty slot
+    for (int i = 0; i < ARP_CACHE_SIZE; i++) {
+        if (!arp_cache[i].valid) { // check for an invalid slot
+            arp_cache[i].ip = *ip; // store the ip
+            arp_cache[i].mac = *mac; // store the mac
+            arp_cache[i].valid = 1; // mark the entry as valid
+            return 0; // success
+        }
+    }
+
+    // Cache is full, replace first entry
+    arp_cache[0].ip = *ip;
+    arp_cache[0].mac = *mac;
+    arp_cache[0].valid = 1;
+    return 0; // success, but replaced an old entry
+}
+
+
 /**
  * gcc 4.x-ism to pack structures (to be used before structs);
  * Using this still causes structs to be unaligned on the stack on Sparc
@@ -383,26 +451,38 @@ forward_frame_payload_to (struct Interface *ifc,
  * @param payload_size number of bytes in @a payload
  */
 static void
-route (struct Interface *origin,
-       const struct IPv4Header *ip,
-       const void *payload,
-       size_t payload_size)
+route (struct Interface *origin, // the interface the packet came from
+       const struct IPv4Header *ip, // the IPv4 header of the incoming packet
+       const void *payload, // the packets payload
+       size_t payload_size) // length of the packet payload
 {
-  /* TODO: do work here */
+    /* TODO: do work here */
+
+    // iterate over the routing table to find a matching route
     for (int i = 0; i < ROUTE_TABLE_SIZE; i++) {
-      if (route_table[i].valid &&
-          (ip->destination_address.s_addr & route_table[i].target_netmask.s_addr) ==
-          route_table[i].target_network.s_addr) {
-        struct MacAddress *next_hop_mac = lookup_arp_cache(&route_table[i].next_hop);
-        if (next_hop_mac) {
-          forward_frame_payload_to(route_table[i].ifc, next_hop_mac, ETH_P_IPV4, ip, payload_size);
-        } else {
-          fprintf(stderr, "No ARP entry for next hop %s\n", inet_ntoa(route_table[i].next_hop));
+        if (route_table[i].valid) { // check of the routing table entry is valid
+
+            // calculate the masked destination using the netmask
+            uint32_t masked_dest = ip->destination_address.s_addr & route_table[i].target_netmask.s_addr;
+
+            // check if the masked destination matches the target network
+            if ((ip->destination_address.s_addr & route_table[i].target_netmask.s_addr) == route_table[i].target_network.s_addr) {
+
+                /* TODO: lookup_arp_cache not yet implemented */
+                // attempt to look up the next-hop MAC address in the ARP cache
+                struct MacAddress *next_hop_mac = lookup_arp_cache(&route_table[i].next_hop);
+
+                // if the MAC address is found in the ARP cache, forward the frame
+                if (next_hop_mac) {
+                    forward_frame_payload_to(route_table[i].ifc, next_hop_mac, ETH_P_IPV4, ip, payload_size);
+                } else {
+                    // if no MAC address is found, log a failure
+                }
+
+                return; //stop further route lookup as a matching route was found
+            }
         }
-        return;
-      }
     }
-fprintf(stderr, "No route to host %s\n", inet_ntoa(ip->destination_address));
 }
 
 
@@ -419,18 +499,32 @@ handle_arp (struct Interface *ifc,
             const struct ArpHeaderEthernetIPv4 *ah)
 {
   /* TODO: do work here */
+    // check if received ARP packet is a request
     if (ntohs(ah->oper) == 1) { // ARP Request
+
+      // verify if the target protocol address in the ARP request matches the interface IP
       if (memcmp(&ah->target_pa, &ifc->ip, sizeof(struct in_addr)) == 0) {
+
+        // prepare an ARP reply as a response to the incoming request
         struct ArpHeaderEthernetIPv4 reply = *ah;
-        reply.oper = htons(2); // ARP Reply
+
+        reply.oper = htons(2); // set the operation to ARP Reply
+
+        // set the target MAC and target IP in the ARP reply
         reply.target_ha = ah->sender_ha;
         reply.target_pa = ah->sender_pa;
+
+        // set the sender MAC and sender IP in the ARP reply
         reply.sender_ha = ifc->mac;
         reply.sender_pa = ifc->ip;
 
+        // send the ARP reply bakc to the requesting device
         forward_frame_payload_to(ifc, &ah->sender_ha, ETH_P_ARP, &reply, sizeof(reply));
       }
-    } else if (ntohs(ah->oper) == 2) { // ARP Reply
+    }
+    // check if received ARP packet is a reply
+    else if (ntohs(ah->oper) == 2) { // ARP Reply
+      // add the sender IP and MAC address to the ARP cache
       add_to_arp_cache(&ah->sender_pa, &ah->sender_ha);
     }
 }
@@ -597,18 +691,6 @@ process_cmd_arp ()
     return;
   }
   /* TODO: do MAC lookup */
-  if (0 == lookup_arp_cache(&v4, &mac))
-    {
-      printf ("MAC address for %s on interface %s is %02X:%02X:%02X:%02X:%02X:%02X\n",
-              inet_ntoa(v4), ifc->name,
-              mac.addr[0], mac.addr[1], mac.addr[2],
-              mac.addr[3], mac.addr[4], mac.addr[5]);
-    }
-    else
-    {
-      fprintf (stderr, "No ARP entry for %s on interface %s\n",
-               inet_ntoa(v4), ifc->name);
-    }
 }
 
 
@@ -761,9 +843,23 @@ process_cmd_route_add ()
                         &ifc))
     return;
   /* TODO: Add routing table entry */
-  if (0 == add_route(&target_network, &target_netmask, &next_hop, ifc))
-      printf("Route added successfully\n");
-}
+
+  // iterate over the routing table to find a free/invalid entry
+    for (int i = 0; i < ROUTE_TABLE_SIZE; i++) {
+      // check if the entry is invalid (free to use)
+      if (!route_table[i].valid) {
+        // set the entry
+        route_table[i].target_network = target_network;
+        route_table[i].target_netmask = target_netmask;
+        route_table[i].next_hop = next_hop;
+        route_table[i].ifc = ifc;
+        route_table[i].valid = 1;
+
+        return;
+      }
+    }
+    fprintf(stderr, "Error: Routing table is full\n");
+  }
 
 
 /**
@@ -783,8 +879,21 @@ process_cmd_route_del ()
                         &ifc))
     return;
   /* TODO: Delete routing table entry */
-  if (0 == delete_route(&target_network, &target_netmask))
-      printf("Route deleted successfully\n");
+  // iterate over the routing table to find a matching route
+  for (int i = 0; i < ROUTE_TABLE_SIZE; i++) {
+    // check if the current entry is valid and matches the input target network and netmask
+    if (route_table[i].valid
+        && route_table[i].target_network.s_addr == target_network.s_addr
+        && route_table[i].target_netmask.s_addr == target_netmask.s_addr
+       ) {
+
+        // invalidate the matching route entry
+        route_table[i].valid = 0;
+
+        return;
+      }
+    }
+  fprintf(stderr, "Error: Route not found\n");
 }
 
 
@@ -795,7 +904,6 @@ static void
 process_cmd_route_list ()
 {
   /* TODO: show routing table with 'print' */
-  print_routing_table();
 }
 
 

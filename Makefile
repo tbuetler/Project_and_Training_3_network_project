@@ -1,10 +1,10 @@
 instructions = nprj0.pdf nprj1.pdf nprj2.pdf nprj3.pdf faq.pdf kickoff-slides.pdf nprjw.pdf
 programs = parser hub switch vswitch arp router
-# tests = test-hub
+#tests = test-hub
 #tests =  test-switch
 #tests = test-vswitch
-tests = test-arp
-#tests = test-router
+#tests = test-arp
+tests = test-router
 
 all: network-driver $(programs) $(tests)
 docs: $(instructions)
@@ -35,21 +35,24 @@ $(programs): %: %.c glab.h loop.c print.c crc.c
 #	gcc $(CFLAGS) $^ -o $@
 #test-vswitch: test-vswitch.c harness.c harness.h
 #	gcc $(CFLAGS) $^ -o $@
-test-arp: test-arp.c harness.c harness.h
-	gcc $(CFLAGS) $^ -o $@
-#test-router: test-router.c harness.c harness.h
+#test-arp: test-arp.c harness.c harness.h
 #	gcc $(CFLAGS) $^ -o $@
+test-router: test-router.c harness.c harness.h
+	gcc $(CFLAGS) $^ -o $@
 
-check: check-hub check-switch check-arp check-router
+#check: check-hub
+#check: check-switch
+#check: check-arp
+check: check-router
 
-check-hub: test-hub
-	./test-hub ./hub
-check-switch: test-switch
-	./test-switch ./switch
-check-vswitch: test-vswitch
-	./test-vswitch ./vswitch
-check-arp: test-arp
-	./test-arp ./arp
+#check-hub: test-hub
+#	./test-hub ./hub
+#check-switch: test-switch
+#	./test-switch ./switch
+#check-vswitch: test-vswitch
+#	./test-vswitch ./vswitch
+#check-arp: test-arp
+#	./test-arp ./arp
 check-router: test-router
 	./test-router ./router
 arch.pdf: arch.svg

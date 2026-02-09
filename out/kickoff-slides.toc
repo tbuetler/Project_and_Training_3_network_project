@@ -1,0 +1,6 @@
+\beamer@sectionintoc {1}{Lab overview}{3}{0}{1}
+\beamer@sectionintoc {2}{Organization}{5}{0}{2}
+\beamer@sectionintoc {3}{Hardware}{7}{0}{3}
+\beamer@sectionintoc {4}{Software}{10}{0}{4}
+\beamer@sectionintoc {5}{Strategy}{14}{0}{5}
+\beamer@sectionintoc {6}{Tools}{18}{0}{6}
